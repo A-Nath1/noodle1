@@ -357,7 +357,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
             </g>
           </svg>
         </div>
-        <span class="bowl-version">Edition 3.0</span>
+        <span class="bowl-version">Edition 3.1</span>
       </div>
 
     </div>
@@ -373,7 +373,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
         <span class="pill">🔗 Connect</span>
         <span class="pill">🕹️ Game</span>
         <span class="pill">📄 PDF Support</span>
-        <span class="pill">⚡ Instant AI</span>
+        <span class="pill">⚡ Token Optimized</span>
         <span class="pill">🎯 Difficulty Levels</span>
         <span class="pill hot">● Live</span>
         <span class="pill">📝 Summaries</span>
@@ -383,7 +383,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
         <span class="pill">🔗 Connect</span>
         <span class="pill">🕹️ Game</span>
         <span class="pill">📄 PDF Support</span>
-        <span class="pill">⚡ Instant AI</span>
+        <span class="pill">⚡ Token Optimized</span>
         <span class="pill">🎯 Difficulty Levels</span>
       </div>
     </div>
@@ -443,7 +443,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
               <button class="mode-btn on" id="type-summary"    onclick="selectOutputType('summary')">Summary</button>
               <button class="mode-btn"    id="type-mindmap"    onclick="selectOutputType('mindmap')">Mindmap</button>
               <button class="mode-btn"    id="type-quiz"       onclick="selectOutputType('quiz')">Quiz</button>
-              <button class="mode-btn"    id="type-flashcards" onclick="selectOutputType('flashcards')">Cards</button>
+              <button class="mode-btn"    id="type-flashcards" onclick="selectOutputType('flashcards')">Flashcards</button>
               <button class="mode-btn"    id="type-connect"    onclick="selectOutputType('connect')">Connect</button>
               <button class="mode-btn"    id="type-game"       onclick="selectOutputType('game')">Game</button>
             </div>
@@ -820,11 +820,26 @@ function finishLoadingProgress() {
 function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 async function startAnalysis() {
-  const notes=state.fileText||document.getElementById('notes-input').value.trim();
-  if(!notes){showToast('Enter or upload notes first!','error');return;}
-  if(notes.length<50){showToast('Notes too short — add more!','error');return;}
-  state.notes=notes;
+  let rawNotes=state.fileText||document.getElementById('notes-input').value;
+  if(!rawNotes.trim()){showToast('Enter or upload notes first!','error');return;}
+  
+  // --- TOKEN OPTIMIZATION PIPELINE ---
+  // 1. Compress massive whitespace gaps (especially common from PDFs) into single spaces to save input tokens.
+  let optNotes = rawNotes.replace(/\s+/g, ' ').trim();
+
+  if(optNotes.length<50){showToast('Notes too short — add more!','error');return;}
+
+  // 2. Safe truncation to ~15,000 tokens (approx 65k chars) to strictly guard the free tier daily token limits.
+  if(optNotes.length > 65000) {
+    optNotes = optNotes.substring(0, 65000);
+    setTimeout(() => showToast('Notes auto-trimmed to protect free limits! ✂️', 'info'), 1500);
+  }
+  
+  state.notes = optNotes;
+  // -----------------------------------
+
   state.userDesc=document.getElementById('describe-input').value.trim();
+  
   setGenerationLoading(true);
   startLoadingProgress();
   document.getElementById('results-section').classList.remove('vis');
