@@ -51,15 +51,20 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
 /* ── HEADER ── */
 .hdr { border-bottom: var(--b3); padding-bottom: 1.25rem; margin-bottom: 2.5rem; }
 .hdr-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.logo-block { display: flex; flex-direction: column; gap: 0.15rem; }
-.logo { font-family: 'Lilita One', cursive; font-size: clamp(4rem,13vw,8rem); line-height: 0.88; letter-spacing: 0.01em; color: var(--dark); user-select: none; text-shadow: 5px 5px 0px var(--blue); display: inline-block; cursor: default; transition: transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), letter-spacing 0.4s ease, text-shadow 0.4s ease; }
-.logo:hover { transform: scale(1.04) rotate(-1.5deg); letter-spacing: 0.06em; text-shadow: 7px 7px 0px var(--blue), 0 0 40px rgba(140,192,235,0.5); }
+.logo-block { display: flex; flex-direction: column; gap: 0.15rem; cursor: pointer; transition: transform 0.2s ease; }
+.logo-block:hover { transform: translateY(-2px); }
+.logo { font-family: 'Lilita One', cursive; font-size: clamp(4rem,13vw,8rem); line-height: 0.88; letter-spacing: 0.01em; color: var(--dark); user-select: none; text-shadow: 5px 5px 0px var(--blue); display: inline-block; cursor: pointer; transition: transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), letter-spacing 0.4s ease, text-shadow 0.4s ease; }
+.logo-block:hover .logo { transform: scale(1.04) rotate(-1.5deg); letter-spacing: 0.06em; text-shadow: 7px 7px 0px var(--blue), 0 0 40px rgba(140,192,235,0.5); }
 .logo em { font-style: normal; color: var(--blue); text-shadow: 5px 5px 0px var(--dark); }
 .logo-tagline { font-family: 'Fredoka', sans-serif; font-size: clamp(0.95rem,2.5vw,1.3rem); font-weight: 600; color: var(--dark-mid); letter-spacing: 0.04em; padding-left: 0.15rem; }
 
 /* ── NOODLE BOWL ── */
 .bowl-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 .bowl-svg-outer { position: relative; width: 110px; height: 110px; cursor: default; }
+
+/* Gamification Elements */
+.ingred { transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.175,0.885,0.32,1.275); opacity: 0; transform: translateY(15px); }
+.ingred.vis { opacity: 1; transform: translateY(0); }
 
 /* Steam */
 .steam { opacity: 0; }
@@ -142,7 +147,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
 /* ── OUTPUT CONTROLS ── */
 .ctl-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
 .ctl-label { font-family: 'Fredoka', sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dark-mid); display: block; margin-bottom: 0.5rem; }
-.modes { display: flex; border: var(--b3); border-radius: var(--radius-pill); overflow: hidden; box-shadow: var(--shadow-sm); }
+.modes { display: flex; flex-wrap: wrap; border: var(--b3); border-radius: var(--radius-pill); overflow: hidden; box-shadow: var(--shadow-sm); }
 .mode-btn { font-family: 'Fredoka', sans-serif; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1.2rem; cursor: pointer; border: none; border-right: var(--b3); background: var(--white); color: var(--dark-light); transition: background 0.15s, color 0.15s; }
 .mode-btn:last-child { border-right: none; }
 .mode-btn:hover { background: var(--blue-light); color: var(--dark); }
@@ -195,6 +200,12 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
 .ai-content li { margin-bottom: 0.35rem; }
 .ai-content strong { color: var(--dark); font-weight: 700; }
 
+/* ── GAME CARDS ── */
+.game-card { padding: 1.25rem 1rem; border: var(--b2); border-radius: var(--radius); background: var(--yellow); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.9rem; text-align: center; cursor: pointer; box-shadow: var(--shadow-sm); transition: all 0.2s cubic-bezier(0.175,0.885,0.32,1.275); user-select: none; display: flex; align-items: center; justify-content: center; min-height: 90px; word-break: break-word; }
+.game-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); background: var(--blue-light); }
+.game-card.selected { background: var(--blue); color: var(--white); border-color: var(--dark); box-shadow: inset 0 0 0 2px var(--dark); transform: scale(0.96); }
+.game-card.matched { background: #f0fdf4; border-color: #16a34a; color: #16a34a; box-shadow: none; cursor: default; transform: none; opacity: 0.6; }
+
 /* ── QUIZ ── */
 .q-meta { font-family: 'Fredoka', sans-serif; font-size: 0.85rem; font-weight: 600; color: var(--dark-light); margin-bottom: 0.8rem; }
 .q-text { font-family: 'Fredoka', sans-serif; font-size: clamp(1.3rem,4vw,1.75rem); font-weight: 700; line-height: 1.2; margin-bottom: 1.5rem; color: var(--dark); }
@@ -236,7 +247,6 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
   .hdr-row { flex-direction: column; align-items: flex-start; }
   .bowl-wrap { align-self: flex-end; margin-top: -80px; }
   .ctl-row { flex-direction: column; align-items: stretch; }
-  .modes { flex-wrap: wrap; border-radius: var(--radius); }
   .btn-primary { width: 100%; justify-content: center; }
   .opt-grid { grid-template-columns: 1fr 1fr; }
 }
@@ -256,8 +266,8 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
   <header class="hdr">
     <div class="hdr-row">
 
-      <!-- Left: Logo + tagline stacked -->
-      <div class="logo-block">
+      <!-- Left: Logo + tagline stacked (Now Clickable) -->
+      <div class="logo-block" onclick="goToHome()" title="Return to Input">
         <div class="logo">N<em>O</em>ODLE</div>
         <div class="logo-tagline">✏️ Notes, unraveled!</div>
       </div>
@@ -317,6 +327,21 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
                 <g class="noodle-c">
                   <path d="M52 55 Q57 48 62 55 Q67 62 72 55" stroke="#E8B870" stroke-width="2.8" stroke-linecap="round" fill="none"/>
                 </g>
+                
+                <!-- Hidden Gamification Ingredients -->
+                <g id="ing-scallions" class="ingred">
+                  <circle cx="40" cy="56" r="3" fill="#86efac" stroke="#14532d" stroke-width="1"/>
+                  <circle cx="45" cy="53" r="3" fill="#86efac" stroke="#14532d" stroke-width="1"/>
+                  <circle cx="36" cy="59" r="3" fill="#86efac" stroke="#14532d" stroke-width="1"/>
+                </g>
+                <g id="ing-egg" class="ingred">
+                  <ellipse cx="68" cy="56" rx="9" ry="7" fill="#ffffff" stroke="#1A3A5C" stroke-width="1.5" transform="rotate(-15 68 56)"/>
+                  <circle cx="67" cy="56" r="4" fill="#fbbf24"/>
+                </g>
+                <g id="ing-naruto" class="ingred">
+                  <ellipse cx="55" cy="52" rx="7" ry="5" fill="#ffffff" stroke="#1A3A5C" stroke-width="1.5"/>
+                  <path d="M52 52 Q55 50 57 52 Q55 54 52 52" stroke="#ec4899" stroke-width="1.5" fill="none"/>
+                </g>
               </g>
 
               <!-- Front lip keeps the noodles visually tucked into the bowl -->
@@ -332,7 +357,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
             </g>
           </svg>
         </div>
-        <span class="bowl-version">Edition 2.0</span>
+        <span class="bowl-version">Edition 3.0</span>
       </div>
 
     </div>
@@ -345,21 +370,21 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
         <span class="pill">🗺️ Mindmaps</span>
         <span class="pill">❓ Quizzes</span>
         <span class="pill">🃏 Flashcards</span>
+        <span class="pill">🔗 Connect</span>
+        <span class="pill">🕹️ Game</span>
         <span class="pill">📄 PDF Support</span>
         <span class="pill">⚡ Instant AI</span>
-        <span class="pill">🧠 Smart Notes</span>
         <span class="pill">🎯 Difficulty Levels</span>
-        <span class="pill">🔢 Custom Count</span>
         <span class="pill hot">● Live</span>
         <span class="pill">📝 Summaries</span>
         <span class="pill">🗺️ Mindmaps</span>
         <span class="pill">❓ Quizzes</span>
         <span class="pill">🃏 Flashcards</span>
+        <span class="pill">🔗 Connect</span>
+        <span class="pill">🕹️ Game</span>
         <span class="pill">📄 PDF Support</span>
         <span class="pill">⚡ Instant AI</span>
-        <span class="pill">🧠 Smart Notes</span>
         <span class="pill">🎯 Difficulty Levels</span>
-        <span class="pill">🔢 Custom Count</span>
       </div>
     </div>
   </header>
@@ -419,6 +444,8 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
               <button class="mode-btn"    id="type-mindmap"    onclick="selectOutputType('mindmap')">Mindmap</button>
               <button class="mode-btn"    id="type-quiz"       onclick="selectOutputType('quiz')">Quiz</button>
               <button class="mode-btn"    id="type-flashcards" onclick="selectOutputType('flashcards')">Cards</button>
+              <button class="mode-btn"    id="type-connect"    onclick="selectOutputType('connect')">Connect</button>
+              <button class="mode-btn"    id="type-game"       onclick="selectOutputType('game')">Game</button>
             </div>
           </div>
           <button class="btn-primary" onclick="startAnalysis()">Process Notes ✨</button>
@@ -447,7 +474,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
             </div>
           </div>
 
-          <!-- Count (quiz + flashcards only) -->
+          <!-- Count (quiz + flashcards + game only) -->
           <div class="opt-count" id="opt-count">
             <span class="opt-group-label" id="opt-count-label">No. of Questions</span>
             <div class="chip-row">
@@ -455,6 +482,8 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
               <div class="chip sel" data-group="count" data-val="10" onclick="selectChip(this)">10</div>
               <div class="chip"     data-group="count" data-val="15" onclick="selectChip(this)">15</div>
               <div class="chip"     data-group="count" data-val="20" onclick="selectChip(this)">20</div>
+              <div class="chip"     data-group="count" data-val="50" onclick="selectChip(this)">50</div>
+              <div class="chip"     data-group="count" data-val="100" onclick="selectChip(this)">100</div>
             </div>
           </div>
 
@@ -511,12 +540,37 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
           <div id="mindmap-error" style="display:none;margin-top:1rem;padding:0.75rem;border:var(--b2);border-color:#dc2626;border-radius:var(--radius);font-family:'Fredoka',sans-serif;font-size:0.9rem;color:#dc2626;background:#fef2f2;">Oops! Mindmap render failed.</div>
         </div>
 
+        <div id="view-connect" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+            <span class="mono-tag"><span class="stripe"></span>Concept Connections</span>
+            <button class="btn-ghost" onclick="copyToClipboard('connect-content')">Copy ↗</button>
+          </div>
+          <div id="connect-content" class="ai-content"></div>
+        </div>
+
+        <!-- Memory Match Game -->
+        <div id="view-game" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <span class="mono-tag"><span class="stripe"></span>Match the Terms to Definitions!</span>
+            <span class="mono-tag" id="game-score">Matches: 0 / 0</span>
+          </div>
+          <div id="game-board" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1rem;"></div>
+          <div class="q-fb" id="game-feedback" style="margin-top:1.5rem;text-align:center;"></div>
+        </div>
+
         <div id="view-quiz" style="display:none;">
           <div id="quiz-game-area">
             <div class="q-meta">Question <span id="quiz-current-num">1</span> of <span id="quiz-total-num">?</span></div>
             <div class="q-text" id="quiz-question">Loading...</div>
             <div id="quiz-options"></div>
+            
+            <div style="text-align:right; margin-top:0.5rem; margin-bottom: 0.5rem;">
+              <button id="quiz-hint-btn" class="btn-ghost" onclick="getHint('quiz')">💡 Need a Hint?</button>
+            </div>
+            
             <div class="q-fb" id="quiz-feedback"></div>
+            <div class="q-fb" id="ai-helper-box" style="margin-top:0.5rem; font-weight:500;"></div>
+            
             <div style="text-align:right;margin-top:1rem;">
               <button id="quiz-next-btn" class="btn-primary" onclick="nextQuizQuestion()" style="display:none;">Next →</button>
             </div>
@@ -554,6 +608,11 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
               <button class="btn-secondary" onclick="prevFlashcard()" style="flex:1;justify-content:center;border:var(--b2);">← Previous</button>
               <button class="btn-primary"   onclick="nextFlashcard()" style="flex:1;justify-content:center;">Next →</button>
             </div>
+            <div style="display:flex;gap:0.75rem;margin-top:0.75rem;justify-content:center;">
+              <button class="btn-ghost" onclick="getHint('flashcard')">💡 Hint</button>
+              <button class="btn-ghost" onclick="getMnemonic()">🧠 Mnemonic</button>
+            </div>
+            <div class="q-fb" id="flashcard-helper-box" style="margin-top:1rem; font-weight:500; font-size:0.9rem;"></div>
           </div>
         </div>
 
@@ -574,10 +633,13 @@ mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose
 const state = {
   notes:'', fileText:'', fileName:'', userDesc:'',
   outputType:'summary', difficulty:'medium', detail:'standard', count:10,
-  summaryHtml:'', mindmapCode:'',
+  summaryHtml:'', mindmapCode:'', connectHtml:'',
   quizData:[], currentQuizIndex:0, quizScore:0,
-  flashcardsData:[], currentFlashcardIndex:0
+  flashcardsData:[], currentFlashcardIndex:0,
+  gameData:[]
 };
+
+let ingredientsWon = 0; // Tracks Gamification Progress
 
 function showToast(msg, type='info') {
   const t = document.createElement('div');
@@ -596,6 +658,18 @@ function copyToClipboard(id) {
   try{document.execCommand('copy');showToast('Copied!','success');}
   catch(e){showToast('Copy failed.','error');}
   document.body.removeChild(ta);
+}
+
+function goToHome() {
+  if (document.getElementById('results-section').classList.contains('vis')) {
+    goBackToInput();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    // If they are already on the home screen, clicking the header does a soft reset
+    removeFile();
+    document.getElementById('notes-input').value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 function selectChip(el) {
@@ -621,7 +695,10 @@ function selectOutputType(type) {
   } else if(type==='flashcards') {
     countEl.classList.add('vis'); countLbl.innerText='No. of Cards';
     diffEl.style.display=''; detailEl.style.display='';
-  } else if(type==='mindmap') {
+  } else if(type==='game') {
+    countEl.classList.add('vis'); countLbl.innerText='No. of Card Pairs';
+    diffEl.style.display='none'; detailEl.style.display='none';
+  } else if(type==='mindmap' || type==='connect') {
     countEl.classList.remove('vis');
     diffEl.style.display='none'; detailEl.style.display='';
   } else {
@@ -751,13 +828,16 @@ async function startAnalysis() {
   setGenerationLoading(true);
   startLoadingProgress();
   document.getElementById('results-section').classList.remove('vis');
-  ['view-summary','view-mindmap','view-quiz','view-flashcards'].forEach(id=>document.getElementById(id).style.display='none');
+  ['view-summary','view-mindmap','view-quiz','view-flashcards','view-connect','view-game'].forEach(id=>document.getElementById(id).style.display='none');
   try{
     let hdr='';
     if(state.outputType==='summary'){setLoadLabel('Generating Summary...', 'Summary');setProgress(22, 'Generating', 'Generating Summary...');hdr='Summary';await generateSummary();setProgress(88, 'Rendering', 'Formatting your summary...');document.getElementById('summary-content').innerHTML=state.summaryHtml;document.getElementById('view-summary').style.display='';}
     else if(state.outputType==='mindmap'){setLoadLabel('Visualizing Concepts...', 'Mindmap');setProgress(22, 'Generating', 'Visualizing Concepts...');hdr='Mindmap';await generateMindmap();setProgress(88, 'Rendering', 'Drawing your mindmap...');document.getElementById('view-mindmap').style.display='';renderMindmap(state.mindmapCode);}
+    else if(state.outputType==='connect'){setLoadLabel('Connecting dots...', 'Insights');setProgress(22, 'Generating', 'Finding connections...');hdr='Connections';await generateConnect();setProgress(88, 'Rendering', 'Formatting text...');document.getElementById('connect-content').innerHTML=state.connectHtml;document.getElementById('view-connect').style.display='';}
     else if(state.outputType==='quiz'){setLoadLabel('Crafting Quiz...', 'Quiz');setProgress(22, 'Generating', 'Crafting Quiz...');hdr='Quiz';await generateQuiz();setProgress(88, 'Rendering', 'Setting up quiz questions...');document.getElementById('view-quiz').style.display='';restartQuiz();}
     else if(state.outputType==='flashcards'){setLoadLabel('Building Flashcards...', 'Cards');setProgress(22, 'Generating', 'Building Flashcards...');hdr='Flashcards';await generateFlashcards();setProgress(88, 'Rendering', 'Stacking your flashcards...');document.getElementById('view-flashcards').style.display='';restartFlashcards();}
+    else if(state.outputType==='game'){setLoadLabel('Building Game...', 'Game');setProgress(22, 'Generating', 'Building Match Game...');hdr='Match Game';await generateGame();setProgress(88, 'Rendering', 'Shuffling cards...');document.getElementById('view-game').style.display='';renderGame();}
+    
     document.getElementById('results-header-title').innerText=hdr;
     finishLoadingProgress();
     await wait(250);
@@ -781,10 +861,18 @@ function setLoadLabel(txt, stepText){
 
 function descClause(){return state.userDesc?`\n\nUser instructions: "${state.userDesc}"`:''; }
 
+// ── AI GENERATORS ──
+
 async function generateSummary(){
   const dm={brief:'concise (3–5 key points only)',standard:'well-structured and thorough',detailed:'comprehensive and highly detailed with examples and sub-points'};
   const r=await callGemini(`Provide a ${dm[state.detail]} summary of the following notes. Highlight key concepts, main arguments and important details. Structure output using ONLY these HTML tags: <h3>,<p>,<ul>,<li>,<strong>,<em>. No markdown code blocks.${descClause()}\n\nNotes:\n${state.notes}`);
   state.summaryHtml=r.replace(/```html/g,'').replace(/```/g,'').trim();
+}
+
+async function generateConnect(){
+  const dm={brief:'Briefly (1-2 paragraphs)',standard:'Thoroughly',detailed:'In exhaustive detail with examples'};
+  const r=await callGemini(`Identify two highly important but seemingly distinct concepts from the following notes. ${dm[state.detail]} explain how they connect, interact, or influence each other. Structure output using ONLY HTML tags: <h3>,<p>,<ul>,<li>,<strong>,<em>. No markdown code blocks.${descClause()}\n\nNotes:\n${state.notes}`);
+  state.connectHtml=r.replace(/```html/g,'').replace(/```/g,'').trim();
 }
 
 async function generateMindmap(){
@@ -795,17 +883,48 @@ async function generateMindmap(){
 
 async function generateQuiz(){
   const dm={easy:'straightforward factual recall',medium:'moderate comprehension and application',hard:'challenging analysis, inference and critical thinking'};
-  const r=await callGemini(`Create a ${state.count}-question multiple-choice quiz. Difficulty: ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"question":"...","options":["A","B","C","D"],"answerIndex":0}]${descClause()}\n\nNotes:\n${state.notes}`,true);
+  const r=await callGemini(`Create a ${state.count}-question multiple-choice quiz. Difficulty: ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"question":"...","options":["A","B","C","D"],"answerIndex":0, "hint":"A short, Socratic hint without giving away the answer directly"}]${descClause()}\n\nNotes:\n${state.notes}`,true);
   try{state.quizData=JSON.parse(r);if(!Array.isArray(state.quizData)||!state.quizData.length)throw '';}
-  catch{state.quizData=[{question:'Could not generate quiz.',options:['Try again','More notes','Check API','Refresh'],answerIndex:0}];}
+  catch{state.quizData=[{question:'Could not generate quiz.',options:['Try again','More notes','Check API','Refresh'],answerIndex:0, hint:'No hint available.'}];}
 }
 
 async function generateFlashcards(){
   const dm={easy:'basic definitions and simple facts',medium:'key concepts, processes and relationships',hard:'nuanced distinctions, edge cases and deeper explanations'};
-  const r=await callGemini(`Create ${state.count} educational flashcards. Focus on ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"front":"Term (max 7 words)","back":"Definition"}]${descClause()}\n\nNotes:\n${state.notes}`,true);
+  const r=await callGemini(`Create ${state.count} educational flashcards. Focus on ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"front":"Term (max 7 words)","back":"Definition", "hint":"A cryptic Socratic hint to remember the definition", "mnemonic":"A very brief, bizarre, funny visual association (max 2 sentences)"}]${descClause()}\n\nNotes:\n${state.notes}`,true);
   try{state.flashcardsData=JSON.parse(r);if(!Array.isArray(state.flashcardsData)||!state.flashcardsData.length)throw '';}
-  catch{state.flashcardsData=[{front:'Error',back:'Could not generate flashcards.'}];}
+  catch{state.flashcardsData=[{front:'Error',back:'Could not generate flashcards.', hint:'No hint available.', mnemonic:'No mnemonic available.'}];}
 }
+
+async function generateGame(){
+  const r=await callGemini(`Extract exactly ${state.count} key terms and their very short definitions (maximum 6 words per definition) from the notes to create a memory matching game. Return STRICTLY as JSON array: [{"term":"...","def":"..."}]${descClause()}\n\nNotes:\n${state.notes}`,true);
+  try{state.gameData=JSON.parse(r);if(!Array.isArray(state.gameData)||!state.gameData.length)throw '';}
+  catch{state.gameData=[{term:'Error',def:'Could not generate game.'}];}
+}
+
+// ── AI HELPERS (Socratic & Mnemonics) ──
+
+function getHint(type) {
+  const boxId = type === 'quiz' ? 'ai-helper-box' : 'flashcard-helper-box';
+  const box = document.getElementById(boxId);
+  box.style.display = 'block'; box.className = 'q-fb ok';
+  
+  if (type === 'quiz') {
+    const q = state.quizData[state.currentQuizIndex];
+    box.innerHTML = `<strong>💡 Hint:</strong> ${q.hint || 'No hint generated.'}`;
+  } else {
+    const c = state.flashcardsData[state.currentFlashcardIndex];
+    box.innerHTML = `<strong>💡 Hint:</strong> ${c.hint || 'No hint generated.'}`;
+  }
+}
+
+function getMnemonic() {
+  const box = document.getElementById('flashcard-helper-box');
+  box.style.display = 'block'; box.className = 'q-fb ok';
+  const c = state.flashcardsData[state.currentFlashcardIndex];
+  box.innerHTML = `<strong>🧠 Mnemonic:</strong> ${c.mnemonic || 'No mnemonic generated.'}`;
+}
+
+// ── RENDERERS ──
 
 async function renderMindmap(code){
   const el=document.getElementById('mindmap-render');const err=document.getElementById('mindmap-error');
@@ -815,17 +934,130 @@ async function renderMindmap(code){
 }
 
 function restartFlashcards(){state.currentFlashcardIndex=0;renderFlashcard();}
+
 function renderFlashcard(){
   if(!state.flashcardsData.length)return;
   const c=state.flashcardsData[state.currentFlashcardIndex];
   document.getElementById('flashcard-current-num').innerText=state.currentFlashcardIndex+1;
   document.getElementById('flashcard-total-num').innerText=state.flashcardsData.length;
-  document.getElementById('flashcard-front').innerText=c.front;
-  document.getElementById('flashcard-back').innerText=c.back;
+  
+  const frontEl = document.getElementById('flashcard-front');
+  const backEl = document.getElementById('flashcard-back');
+  
+  frontEl.innerText=c.front;
+  backEl.innerText=c.back;
+
+  // Dynamic font sizing based on text length to ensure it fits
+  const getFontSize = (text) => {
+    const len = text.length;
+    if (len > 150) return 'clamp(0.85rem, 2vw, 1.1rem)';
+    if (len > 80) return 'clamp(1rem, 2.5vw, 1.4rem)';
+    if (len > 40) return 'clamp(1.2rem, 3vw, 1.8rem)';
+    return ''; // Fallback to the default CSS clamp
+  };
+
+  frontEl.style.fontSize = getFontSize(c.front);
+  backEl.style.fontSize = getFontSize(c.back);
+
   document.getElementById('flashcard-container').classList.remove('flipped');
+  const helperBox = document.getElementById('flashcard-helper-box');
+  if(helperBox) helperBox.style.display = 'none';
 }
-function nextFlashcard(){if(state.currentFlashcardIndex<state.flashcardsData.length-1){state.currentFlashcardIndex++;renderFlashcard();}else{showToast('End of flashcards!','info');}}
-function prevFlashcard(){if(state.currentFlashcardIndex>0){state.currentFlashcardIndex--;renderFlashcard();}}
+
+function nextFlashcard(){
+  if(state.currentFlashcardIndex<state.flashcardsData.length-1){
+    state.currentFlashcardIndex++;
+    renderFlashcard();
+  } else {
+    showToast('End of flashcards!','info');
+    checkRewards();
+  }
+}
+
+function prevFlashcard(){
+  if(state.currentFlashcardIndex>0){
+    state.currentFlashcardIndex--;
+    renderFlashcard();
+  }
+}
+
+// ── MATCH GAME LOGIC ──
+
+let gameMatches = 0;
+let gameFirstCard = null;
+let gameLocked = false;
+
+function renderGame() {
+  const board = document.getElementById('game-board');
+  board.innerHTML = '';
+  gameMatches = 0;
+  gameFirstCard = null;
+  gameLocked = false;
+  
+  document.getElementById('game-score').innerText = `Matches: 0 / ${state.gameData.length}`;
+  document.getElementById('game-feedback').style.display = 'none';
+  
+  // Flatten into cards
+  let cards = [];
+  state.gameData.forEach((item, idx) => {
+    cards.push({ id: `term-${idx}`, text: item.term, matchId: idx, type: 'term' });
+    cards.push({ id: `def-${idx}`, text: item.def, matchId: idx, type: 'def' });
+  });
+  
+  // Shuffle randomly
+  cards = cards.sort(() => Math.random() - 0.5);
+  
+  cards.forEach(c => {
+    const btn = document.createElement('div');
+    btn.className = 'game-card';
+    btn.innerText = c.text;
+    btn.onclick = () => handleGameCardClick(btn, c);
+    board.appendChild(btn);
+  });
+}
+
+function handleGameCardClick(btn, cardInfo) {
+  if (gameLocked || btn.classList.contains('matched') || btn.classList.contains('selected')) return;
+  
+  btn.classList.add('selected');
+  
+  if (!gameFirstCard) {
+    gameFirstCard = { btn, cardInfo };
+  } else {
+    gameLocked = true;
+    const isMatch = (gameFirstCard.cardInfo.matchId === cardInfo.matchId) && (gameFirstCard.cardInfo.type !== cardInfo.type);
+    
+    if (isMatch) {
+      setTimeout(() => {
+        btn.classList.remove('selected');
+        btn.classList.add('matched');
+        gameFirstCard.btn.classList.remove('selected');
+        gameFirstCard.btn.classList.add('matched');
+        
+        gameMatches++;
+        document.getElementById('game-score').innerText = `Matches: ${gameMatches} / ${state.gameData.length}`;
+        
+        if (gameMatches === state.gameData.length) {
+          const fb = document.getElementById('game-feedback');
+          fb.style.display = 'block';
+          fb.className = 'q-fb ok';
+          fb.innerText = '🎉 Fantastic memory! You matched everything!';
+          checkRewards();
+        }
+        
+        gameFirstCard = null;
+        gameLocked = false;
+      }, 400);
+    } else {
+      setTimeout(() => {
+        btn.classList.remove('selected');
+        gameFirstCard.btn.classList.remove('selected');
+        gameFirstCard = null;
+        gameLocked = false;
+      }, 800);
+    }
+  }
+}
 
 function renderQuizQuestion(){
   if(!state.quizData.length)return;
@@ -838,7 +1070,12 @@ function renderQuizQuestion(){
   document.getElementById('quiz-feedback').style.display='none';
   document.getElementById('quiz-feedback').className='q-fb';
   document.getElementById('quiz-next-btn').style.display='none';
+  
+  // Reset Helpers
+  document.getElementById('ai-helper-box').style.display = 'none';
+  document.getElementById('quiz-hint-btn').style.display = '';
 }
+
 function handleQuizAnswer(si){
   const q=state.quizData[state.currentQuizIndex];const ok=si===q.answerIndex;
   document.querySelectorAll('.q-opt').forEach((b,i)=>{b.disabled=true;if(i===q.answerIndex)b.classList.add('correct');else if(i===si&&!ok)b.classList.add('wrong');else b.style.opacity='0.4';});
@@ -848,9 +1085,47 @@ function handleQuizAnswer(si){
   const nb=document.getElementById('quiz-next-btn');nb.style.display='';
   nb.innerText=state.currentQuizIndex===state.quizData.length-1?'See Results 🎉':'Next Question →';
 }
-function nextQuizQuestion(){if(state.currentQuizIndex<state.quizData.length-1){state.currentQuizIndex++;renderQuizQuestion();}else{showQuizResults();}}
-function showQuizResults(){document.getElementById('quiz-game-area').style.display='none';document.getElementById('quiz-results-area').style.display='';document.getElementById('quiz-score-final').innerText=state.quizScore;document.getElementById('quiz-score-total').innerText=state.quizData.length;}
-function restartQuiz(){state.currentQuizIndex=0;state.quizScore=0;document.getElementById('quiz-results-area').style.display='none';document.getElementById('quiz-game-area').style.display='';renderQuizQuestion();}
+
+function nextQuizQuestion(){
+  if(state.currentQuizIndex<state.quizData.length-1){
+    state.currentQuizIndex++;
+    renderQuizQuestion();
+  } else {
+    showQuizResults();
+  }
+}
+
+function showQuizResults(){
+  document.getElementById('quiz-game-area').style.display='none';
+  document.getElementById('quiz-results-area').style.display='';
+  document.getElementById('quiz-score-final').innerText=state.quizScore;
+  document.getElementById('quiz-score-total').innerText=state.quizData.length;
+  
+  if (state.quizScore === state.quizData.length && state.quizData.length > 0) {
+    setTimeout(checkRewards, 800);
+  }
+}
+
+function restartQuiz(){
+  state.currentQuizIndex=0;
+  state.quizScore=0;
+  document.getElementById('quiz-results-area').style.display='none';
+  document.getElementById('quiz-game-area').style.display='';
+  renderQuizQuestion();
+}
+
+// ── GAMIFICATION PROGRESSION ──
+
+function checkRewards() {
+  if (ingredientsWon === 0) document.getElementById('ing-scallions').classList.add('vis');
+  else if (ingredientsWon === 1) document.getElementById('ing-egg').classList.add('vis');
+  else if (ingredientsWon >= 2) document.getElementById('ing-naruto').classList.add('vis');
+  
+  if (ingredientsWon < 3) {
+    showToast('🍜 Bowl leveled up!', 'success');
+    ingredientsWon++;
+  }
+}
 </script>
 </body>
 </html>
