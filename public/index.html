@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noodle | Notes, unraveled.</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --yellow:      #FFF9D2;
+  --peach:       #FFEBCC;
+  --blue-light:  #BFDDF0;
+  --blue:        #8CC0EB;
+  --blue-deep:   #5A9FD4;
+  --dark:        #1A3A5C;
+  --dark-mid:    #3A6A9A;
+  --dark-light:  #6A9FC8;
+  --white:       #FFFFFF;
+  --b3:          3px solid #1A3A5C;
+  --b2:          2px solid #1A3A5C;
+  --shadow:      5px 5px 0px #1A3A5C;
+  --shadow-sm:   3px 3px 0px #1A3A5C;
+  --shadow-lg:   7px 7px 0px #1A3A5C;
+  --radius:      18px;
+  --radius-lg:   24px;
+  --radius-pill: 100px;
+}
+
+body { font-family: 'Nunito', sans-serif; background: var(--yellow); color: var(--dark); min-height: 100vh; overflow-x: hidden; }
+
+body::before { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle, rgba(140,192,235,0.3) 2px, transparent 2px); background-size: 32px 32px; pointer-events: none; z-index: 0; }
+
+.blob-wrap { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; opacity: 0.6; }
+.blob { position: absolute; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; filter: blur(70px); animation: blobmove 18s infinite alternate cubic-bezier(.4,0,.2,1); }
+.blob-1 { width: 45vw; height: 45vw; top: -15%; left: -10%; background: rgba(140,192,235,0.35); animation-delay: 0s; }
+.blob-2 { width: 55vw; height: 55vw; top: 40%; right: -20%; background: rgba(255,235,204,0.5); animation-delay: -6s; }
+.blob-3 { width: 40vw; height: 40vw; bottom: -15%; left: 20%; background: rgba(191,221,240,0.4); animation-delay: -12s; }
+@keyframes blobmove {
+  0%   { transform: translate(0,0) scale(1);   border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+  33%  { transform: translate(30px,-40px) scale(1.08); border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+  66%  { transform: translate(-20px,25px) scale(0.95); border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+  100% { transform: translate(0,0) scale(1);   border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+}
+
+.wrap { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 3rem; position: relative; z-index: 1; }
+
+/* ── HEADER ── */
+.hdr { border-bottom: var(--b3); padding-bottom: 1.25rem; margin-bottom: 2.5rem; }
+.hdr-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.logo-block { display: flex; flex-direction: column; gap: 0.15rem; }
+.logo { font-family: 'Lilita One', cursive; font-size: clamp(4rem,13vw,8rem); line-height: 0.88; letter-spacing: 0.01em; color: var(--dark); user-select: none; text-shadow: 5px 5px 0px var(--blue); display: inline-block; cursor: default; transition: transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275), letter-spacing 0.4s ease, text-shadow 0.4s ease; }
+.logo:hover { transform: scale(1.04) rotate(-1.5deg); letter-spacing: 0.06em; text-shadow: 7px 7px 0px var(--blue), 0 0 40px rgba(140,192,235,0.5); }
+.logo em { font-style: normal; color: var(--blue); text-shadow: 5px 5px 0px var(--dark); }
+.logo-tagline { font-family: 'Fredoka', sans-serif; font-size: clamp(0.95rem,2.5vw,1.3rem); font-weight: 600; color: var(--dark-mid); letter-spacing: 0.04em; padding-left: 0.15rem; }
+
+/* ── NOODLE BOWL ── */
+.bowl-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.bowl-svg-outer { position: relative; width: 110px; height: 110px; cursor: default; }
+
+/* Steam */
+.steam { opacity: 0; }
+.bowl-svg-outer:hover .steam-1 { animation: steamrise 1.8s ease-in-out 0s   infinite; }
+.bowl-svg-outer:hover .steam-2 { animation: steamrise 1.8s ease-in-out 0.6s infinite; }
+.bowl-svg-outer:hover .steam-3 { animation: steamrise 1.8s ease-in-out 1.2s infinite; }
+@keyframes steamrise {
+  0%   { opacity: 0;   transform: translateY(0px)   scaleX(1); }
+  30%  { opacity: 0.7; transform: translateY(-8px)  scaleX(1.1); }
+  70%  { opacity: 0.35;transform: translateY(-18px) scaleX(0.9); }
+  100% { opacity: 0;   transform: translateY(-28px) scaleX(1.2); }
+}
+
+/* Noodle wiggle */
+.bowl-svg-outer:hover .noodle-a { animation: noodlewiggle 0.45s ease-in-out 0s    infinite alternate; }
+.bowl-svg-outer:hover .noodle-b { animation: noodlewiggle 0.45s ease-in-out 0.1s  infinite alternate; }
+.bowl-svg-outer:hover .noodle-c { animation: noodlewiggle 0.45s ease-in-out 0.2s  infinite alternate; }
+@keyframes noodlewiggle {
+  from { transform: translateY(-1px) rotate(-4deg) scaleY(0.98); }
+  to   { transform: translateY(1px)  rotate(4deg)  scaleY(1.02); }
+}
+.noodle-a, .noodle-b, .noodle-c {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  will-change: transform;
+}
+
+/* Bowl rock */
+.bowl-body-g { transform-origin: 50% 88px; }
+.bowl-svg-outer:hover .bowl-body-g { animation: bowlrock 0.55s ease-in-out infinite alternate; }
+@keyframes bowlrock { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+
+/* Chopstick bob */
+.chop-a { transform-origin: 60px 82px; }
+.chop-b { transform-origin: 67px 82px; }
+.bowl-svg-outer:hover .chop-a { animation: chopbob 0.65s ease-in-out 0s   infinite alternate; }
+.bowl-svg-outer:hover .chop-b { animation: chopbob 0.65s ease-in-out 0.2s infinite alternate-reverse; }
+@keyframes chopbob { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+
+.bowl-version { font-family: 'Fredoka', sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border: var(--b2); background: var(--blue-light); border-radius: var(--radius-pill); padding: 3px 12px; box-shadow: var(--shadow-sm); }
+
+/* ── MARQUEE ── */
+.marquee-wrap { overflow: hidden; margin-top: 1.25rem; -webkit-mask-image: linear-gradient(to right,transparent,black 8%,black 92%,transparent); mask-image: linear-gradient(to right,transparent,black 8%,black 92%,transparent); }
+.marquee-track { display: flex; width: max-content; animation: marquee 30s linear infinite; gap: 0.6rem; }
+.marquee-track:hover { animation-play-state: paused; }
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.pill { font-family: 'Fredoka', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; padding: 5px 16px; border: var(--b2); border-radius: var(--radius-pill); color: var(--dark); background: var(--white); box-shadow: var(--shadow-sm); white-space: nowrap; transition: transform 0.2s ease, background 0.2s ease; }
+.pill:hover { transform: translateY(-2px); background: var(--blue-light); }
+.pill.hot { background: var(--blue); }
+
+/* ── BLOCKS ── */
+.block { border: var(--b3); border-radius: 24px 32px 24px 32px / 32px 24px 32px 24px; margin-bottom: 1.5rem; background: var(--white); box-shadow: var(--shadow); overflow: hidden; transition: border-radius 0.6s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s ease, transform 0.2s ease; animation: rise 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.block:hover { border-radius: 32px 24px 32px 24px / 24px 32px 24px 32px; box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+@keyframes rise { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.block-head { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1.4rem; background: var(--blue); color: var(--dark); border-bottom: var(--b3); }
+.block-title { font-family: 'Fredoka', sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.05em; }
+.block-sub { font-family: 'Nunito', sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--dark-mid); }
+.block-body { padding: 1.5rem 1.4rem; }
+
+/* ── INPUTS ── */
+.nt { width: 100%; min-height: 190px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 500; line-height: 1.75; color: var(--dark); background: var(--peach); border: var(--b2); border-radius: var(--radius); padding: 1rem 1.1rem; resize: vertical; outline: none; transition: border 0.15s, box-shadow 0.15s; }
+.nt:focus { border-color: var(--blue-deep); border-width: 3px; box-shadow: 3px 3px 0 var(--blue); }
+.nt::placeholder { color: var(--dark-light); font-style: italic; }
+
+.describe-wrap { margin-top: 1rem; }
+.describe-label-row { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem; font-family: 'Fredoka', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dark-mid); }
+.describe-ta { width: 100%; min-height: 70px; font-family: 'Nunito', sans-serif; font-size: 0.875rem; font-weight: 500; line-height: 1.65; color: var(--dark); background: var(--yellow); border: var(--b2); border-radius: var(--radius); padding: 0.75rem 1rem; resize: vertical; outline: none; transition: border 0.15s, box-shadow 0.15s; }
+.describe-ta:focus { border-color: var(--blue-deep); border-width: 3px; box-shadow: 3px 3px 0 var(--blue); }
+.describe-ta::placeholder { color: var(--dark-light); font-style: italic; }
+
+/* ── FILE DISPLAY ── */
+#file-display { display: none; align-items: center; gap: 1rem; border: var(--b2); border-radius: var(--radius); background: var(--peach); padding: 1rem 1.1rem; position: relative; }
+#file-display.vis { display: flex; }
+.fbox { width: 52px; height: 52px; border: var(--b2); border-radius: 12px; background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; box-shadow: var(--shadow-sm); }
+.fname { font-family: 'Fredoka', sans-serif; font-size: 0.95rem; font-weight: 600; }
+.fstatus { font-family: 'Nunito', sans-serif; font-size: 0.75rem; color: var(--dark-mid); margin-top: 3px; }
+.fremove { position: absolute; top: 0.75rem; right: 0.75rem; width: 28px; height: 28px; border: var(--b2); border-radius: 50%; background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; transition: background 0.15s; box-shadow: var(--shadow-sm); }
+.fremove:hover { background: #ffb3b3; }
+
+/* ── OUTPUT CONTROLS ── */
+.ctl-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+.ctl-label { font-family: 'Fredoka', sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dark-mid); display: block; margin-bottom: 0.5rem; }
+.modes { display: flex; border: var(--b3); border-radius: var(--radius-pill); overflow: hidden; box-shadow: var(--shadow-sm); }
+.mode-btn { font-family: 'Fredoka', sans-serif; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1.2rem; cursor: pointer; border: none; border-right: var(--b3); background: var(--white); color: var(--dark-light); transition: background 0.15s, color 0.15s; }
+.mode-btn:last-child { border-right: none; }
+.mode-btn:hover { background: var(--blue-light); color: var(--dark); }
+.mode-btn.on { background: var(--blue); color: var(--dark); font-weight: 700; }
+
+/* ── OPTION CHIPS GRID ── */
+.opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px,1fr)); gap: 1rem 1.25rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 2px dashed var(--blue-light); }
+.opt-group { display: flex; flex-direction: column; gap: 0.45rem; }
+.opt-group-label { font-family: 'Fredoka', sans-serif; font-size: 0.73rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--dark-mid); }
+.chip-row { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.chip { font-family: 'Fredoka', sans-serif; font-size: 0.82rem; font-weight: 600; padding: 0.3rem 0.85rem; border: var(--b2); border-radius: var(--radius-pill); background: var(--yellow); color: var(--dark); cursor: pointer; box-shadow: var(--shadow-sm); user-select: none; transition: background 0.12s, transform 0.18s cubic-bezier(0.175,0.885,0.32,1.275), box-shadow 0.12s; }
+.chip:hover { background: var(--blue-light); transform: translateY(-2px); }
+.chip.sel { background: var(--blue); box-shadow: var(--shadow); transform: translateY(-1px); }
+.opt-count { display: none; }
+.opt-count.vis { display: flex; flex-direction: column; gap: 0.45rem; }
+
+/* ── BUTTONS ── */
+.btn-upload, .btn-primary, .btn-secondary, .btn-ghost { font-family: 'Fredoka', sans-serif; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; border-radius: var(--radius-pill); }
+.btn-upload { font-size: 0.85rem; padding: 0.45rem 1rem; background: rgba(255,255,255,0.25); color: var(--dark); border: 2px solid var(--dark); transition: background 0.15s; }
+.btn-upload:hover { background: rgba(255,255,255,0.45); }
+.btn-primary { font-size: 1rem; padding: 0.9rem 2.2rem; background: var(--blue); color: var(--dark); border: var(--b3); box-shadow: var(--shadow); transition: transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275), box-shadow 0.15s ease; }
+.btn-primary:hover { transform: translate(-3px,-3px) scale(1.03); box-shadow: var(--shadow-lg); }
+.btn-primary:active { transform: translate(2px,2px) scale(0.98); box-shadow: var(--shadow-sm); }
+.btn-secondary { font-size: 0.82rem; padding: 0.4rem 1rem; background: rgba(255,255,255,0.2); color: var(--dark); border: 2px solid var(--dark); transition: background 0.15s; }
+.btn-secondary:hover { background: rgba(255,255,255,0.35); }
+.btn-ghost { font-size: 0.8rem; padding: 0.35rem 0.9rem; background: var(--peach); color: var(--dark); border: var(--b2); box-shadow: var(--shadow-sm); transition: background 0.15s; }
+.btn-ghost:hover { background: var(--blue-light); }
+
+/* ── LOADING ── */
+#loading-overlay { display: none; }
+#loading-overlay.vis { display: block; }
+.load-body { text-align: center; padding: 3.5rem 2rem; }
+.load-title { font-family: 'Lilita One', cursive; font-size: clamp(2.5rem,8vw,4.5rem); line-height: 1; color: var(--dark); text-shadow: 3px 3px 0 var(--blue); margin-bottom: 1.5rem; }
+.load-spinner-wrap { display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+.load-spinner { width: 56px; height: 56px; border: 4px solid var(--blue-light); border-top-color: var(--blue-deep); border-radius: 50%; animation: spin 0.8s linear infinite; box-shadow: var(--shadow-sm); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-track { width: 100%; max-width: 320px; height: 14px; background: var(--blue-light); margin: 0 auto 0.65rem; border-radius: var(--radius-pill); border: var(--b2); overflow: hidden; box-shadow: var(--shadow-sm); }
+.load-bar { height: 100%; width: 0%; background: var(--blue); border-radius: var(--radius-pill); transition: width 0.35s ease; }
+.load-progress-meta { width: 100%; max-width: 320px; margin: 0 auto 1rem; display: flex; justify-content: space-between; gap: 1rem; font-family: 'Fredoka', sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; color: var(--dark-mid); text-transform: uppercase; }
+.load-label { font-family: 'Fredoka', sans-serif; font-size: 0.95rem; font-weight: 500; color: var(--dark-mid); }
+
+/* ── RESULTS ── */
+#results-section { display: none; }
+#results-section.vis { display: block; }
+.ai-content { font-size: 0.95rem; line-height: 1.8; }
+.ai-content h3 { font-family: 'Fredoka', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--dark); padding: 0.75rem 0 0.4rem; border-top: 2px dashed var(--blue-light); margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.ai-content h3:first-child { border-top: none; margin-top: 0; }
+.ai-content p { color: var(--dark-mid); margin-bottom: 0.9rem; }
+.ai-content ul, .ai-content ol { padding-left: 1.4rem; margin-bottom: 0.9rem; color: var(--dark-mid); }
+.ai-content li { margin-bottom: 0.35rem; }
+.ai-content strong { color: var(--dark); font-weight: 700; }
+
+/* ── QUIZ ── */
+.q-meta { font-family: 'Fredoka', sans-serif; font-size: 0.85rem; font-weight: 600; color: var(--dark-light); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Fredoka', sans-serif; font-size: clamp(1.3rem,4vw,1.75rem); font-weight: 700; line-height: 1.2; margin-bottom: 1.5rem; color: var(--dark); }
+.q-opt { display: flex; align-items: center; gap: 0.875rem; width: 100%; padding: 0.85rem 1rem; border: var(--b2); border-radius: var(--radius); background: var(--yellow); text-align: left; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--dark); cursor: pointer; margin-bottom: 0.5rem; box-shadow: var(--shadow-sm); transition: transform 0.25s cubic-bezier(0.175,0.885,0.32,1.275), box-shadow 0.15s ease, background 0.12s ease; }
+.q-opt:hover:not(:disabled) { background: var(--blue-light); transform: translate(-3px,-3px) scale(1.01); box-shadow: 6px 6px 0 var(--dark); }
+.q-opt .ql { font-family: 'Fredoka', sans-serif; font-size: 0.85rem; font-weight: 700; width: 30px; height: 30px; border: var(--b2); border-radius: 50%; background: var(--white); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+.q-opt:hover:not(:disabled) .ql { background: var(--blue); }
+.q-opt.correct { border-color: #16a34a; background: #f0fdf4; box-shadow: 5px 5px 0 #16a34a; }
+.q-opt.correct .ql { background: #16a34a; color: white; border-color: #16a34a; }
+.q-opt.wrong { border-color: #dc2626; background: #fef2f2; box-shadow: 5px 5px 0 #dc2626; }
+.q-opt.wrong .ql { background: #dc2626; color: white; border-color: #dc2626; }
+.q-fb { display: none; padding: 0.75rem 1.1rem; border: var(--b2); border-radius: var(--radius); margin-top: 1rem; font-family: 'Fredoka', sans-serif; font-size: 0.95rem; font-weight: 700; animation: rise 0.3s ease; }
+.q-fb.ok  { border-color: #16a34a; color: #16a34a; background: #f0fdf4; box-shadow: 3px 3px 0 #16a34a; }
+.q-fb.bad { border-color: #dc2626; color: #dc2626; background: #fef2f2; box-shadow: 3px 3px 0 #dc2626; }
+.score-wrap { text-align: center; padding: 4rem 2rem; }
+.score-big { font-family: 'Lilita One', cursive; font-size: clamp(5rem,18vw,9rem); line-height: 1; letter-spacing: -0.02em; color: var(--dark); text-shadow: 6px 6px 0 var(--blue); }
+.score-rule { width: 56px; height: 4px; background: var(--blue); border-radius: var(--radius-pill); border: var(--b2); margin: 1.5rem auto; box-shadow: var(--shadow-sm); }
+
+/* ── FLASHCARDS ── */
+.perspective { perspective: 1200px; }
+.flip-card { cursor: pointer; }
+.flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.4,0.2,0.2,1); }
+.flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+.fc-face { position: absolute; inset: 0; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; border: var(--b3); border-radius: var(--radius-lg); }
+.fc-face.front { background: var(--blue); color: var(--dark); box-shadow: var(--shadow); }
+.fc-face.back  { background: var(--peach); color: var(--dark); transform: rotateY(180deg); box-shadow: var(--shadow); }
+.fc-label { font-family: 'Fredoka', sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; position: absolute; top: 1rem; left: 1.25rem; color: var(--dark-mid); }
+.fc-text { font-family: 'Fredoka', sans-serif; font-size: clamp(1.5rem,4.5vw,2.5rem); font-weight: 700; line-height: 1.15; }
+.fc-hint { font-family: 'Nunito', sans-serif; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; position: absolute; bottom: 1rem; color: var(--dark-mid); }
+#mindmap-container { min-height: 400px; background: var(--blue-light); border: var(--b2); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; overflow: auto; padding: 1rem; }
+#tc { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; }
+.toast { font-family: 'Fredoka', sans-serif; font-size: 0.9rem; font-weight: 600; padding: 0.7rem 1.1rem; background: var(--white); border: var(--b3); border-radius: var(--radius); box-shadow: var(--shadow); max-width: 280px; display: flex; align-items: center; gap: 0.75rem; animation: rise 0.2s ease both; }
+.toast.ok  { border-color: #16a34a; background: #f0fdf4; }
+.toast.err { border-color: #dc2626; background: #fef2f2; }
+.stripe { display: inline-block; width: 36px; height: 4px; background: var(--blue); border-radius: var(--radius-pill); margin-right: 0.6rem; vertical-align: middle; border: 1px solid var(--dark); }
+.mono-tag { font-family: 'Fredoka', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; color: var(--dark-mid); }
+
+@media (max-width: 580px) {
+  .hdr-row { flex-direction: column; align-items: flex-start; }
+  .bowl-wrap { align-self: flex-end; margin-top: -80px; }
+  .ctl-row { flex-direction: column; align-items: stretch; }
+  .modes { flex-wrap: wrap; border-radius: var(--radius); }
+  .btn-primary { width: 100%; justify-content: center; }
+  .opt-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="blob-wrap">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── HEADER ── -->
+  <header class="hdr">
+    <div class="hdr-row">
+
+      <!-- Left: Logo + tagline stacked -->
+      <div class="logo-block">
+        <div class="logo">N<em>O</em>ODLE</div>
+        <div class="logo-tagline">✏️ Notes, unraveled!</div>
+      </div>
+
+      <!-- Right: Animated noodle bowl -->
+      <div class="bowl-wrap">
+        <div class="bowl-svg-outer" title="Hover for a treat!">
+          <svg width="110" height="110" viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+            <defs>
+              <!-- Keeps animated noodles inside the bowl opening instead of sliding behind the bowl body -->
+              <clipPath id="noodle-rim-clip" clipPathUnits="userSpaceOnUse">
+                <rect x="20" y="43" width="70" height="25" rx="4"/>
+              </clipPath>
+            </defs>
+
+            <!-- Steam (rendered above everything, outside bowl group) -->
+            <g class="steam steam-1" transform-origin="38 42">
+              <path d="M38 44 Q35 37 38 30 Q41 23 38 16" stroke="#8CC0EB" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            </g>
+            <g class="steam steam-2" transform-origin="55 42">
+              <path d="M55 42 Q52 34 55 26 Q58 18 55 10" stroke="#8CC0EB" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            </g>
+            <g class="steam steam-3" transform-origin="72 44">
+              <path d="M72 44 Q69 37 72 30 Q75 23 72 16" stroke="#8CC0EB" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            </g>
+
+            <!-- Chopsticks (bob on hover) -->
+            <g class="chop-a">
+              <rect x="62" y="24" width="3.5" height="40" rx="1.75" fill="#C8845A" stroke="#1A3A5C" stroke-width="1.5"/>
+            </g>
+            <g class="chop-b">
+              <rect x="70" y="22" width="3.5" height="40" rx="1.75" fill="#C8845A" stroke="#1A3A5C" stroke-width="1.5"/>
+            </g>
+
+            <!-- Bowl body group (rocks on hover) -->
+            <g class="bowl-body-g">
+
+              <!-- Bowl rim ellipse -->
+              <ellipse cx="55" cy="59" rx="35" ry="9" fill="#FFEBCC" stroke="#1A3A5C" stroke-width="2.5"/>
+
+              <!-- Bowl body -->
+              <path d="M20 59 Q20 93 55 97 Q90 93 90 59 Z" fill="#FFEBCC" stroke="#1A3A5C" stroke-width="2.5" stroke-linejoin="round"/>
+
+              <!-- Broth surface -->
+              <ellipse cx="55" cy="59" rx="30" ry="7" fill="#FFF9D2" stroke="none"/>
+              <ellipse cx="55" cy="59" rx="25" ry="5" fill="#F7D49A" stroke="none" opacity="0.45"/>
+
+              <!-- Noodle strands stay clipped inside the bowl opening and render above the broth -->
+              <g clip-path="url(#noodle-rim-clip)">
+                <g class="noodle-a">
+                  <path d="M28 56 Q33 49 38 56 Q43 63 48 56" stroke="#E8B870" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+                </g>
+                <g class="noodle-b">
+                  <path d="M40 54 Q45 47 50 54 Q55 61 60 54" stroke="#F0C880" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+                </g>
+                <g class="noodle-c">
+                  <path d="M52 55 Q57 48 62 55 Q67 62 72 55" stroke="#E8B870" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+                </g>
+              </g>
+
+              <!-- Front lip keeps the noodles visually tucked into the bowl -->
+              <path d="M22 61 Q55 68 88 61" stroke="#1A3A5C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M27 60 Q55 65 83 60" stroke="#FFF9D2" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.85"/>
+
+              <!-- Decorative stripes -->
+              <path d="M26 74 Q55 79 84 74" stroke="#8CC0EB" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              <path d="M28 82 Q55 88 82 82" stroke="#8CC0EB" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.55"/>
+
+              <!-- Bowl base foot -->
+              <ellipse cx="55" cy="96" rx="20" ry="4.5" fill="#FFEBCC" stroke="#1A3A5C" stroke-width="2"/>
+            </g>
+          </svg>
+        </div>
+        <span class="bowl-version">Edition 2.0</span>
+      </div>
+
+    </div>
+
+    <!-- Scrolling marquee -->
+    <div class="marquee-wrap">
+      <div class="marquee-track">
+        <span class="pill hot">● Live</span>
+        <span class="pill">📝 Summaries</span>
+        <span class="pill">🗺️ Mindmaps</span>
+        <span class="pill">❓ Quizzes</span>
+        <span class="pill">🃏 Flashcards</span>
+        <span class="pill">📄 PDF Support</span>
+        <span class="pill">⚡ Instant AI</span>
+        <span class="pill">🧠 Smart Notes</span>
+        <span class="pill">🎯 Difficulty Levels</span>
+        <span class="pill">🔢 Custom Count</span>
+        <span class="pill hot">● Live</span>
+        <span class="pill">📝 Summaries</span>
+        <span class="pill">🗺️ Mindmaps</span>
+        <span class="pill">❓ Quizzes</span>
+        <span class="pill">🃏 Flashcards</span>
+        <span class="pill">📄 PDF Support</span>
+        <span class="pill">⚡ Instant AI</span>
+        <span class="pill">🧠 Smart Notes</span>
+        <span class="pill">🎯 Difficulty Levels</span>
+        <span class="pill">🔢 Custom Count</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── INPUT SECTION ── -->
+  <div id="input-section">
+
+    <!-- Block 01 -->
+    <div class="block" style="animation-delay:0.05s">
+      <div class="block-head">
+        <span class="block-title">01 — Input Your Notes</span>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <input type="file" id="file-upload" style="display:none;" accept=".txt,.pdf,.md,.csv,.rtf" onchange="handleFileUpload(event)">
+          <button class="btn-upload" onclick="document.getElementById('file-upload').click()">↑ Upload File</button>
+        </div>
+      </div>
+      <div class="block-body">
+
+        <!-- Notes textarea -->
+        <textarea id="notes-input" class="nt" placeholder="Paste study materials, lecture notes, or any text here...&#10;Minimum 50 characters for analysis 📝"></textarea>
+
+        <!-- File card (shown after upload) -->
+        <div id="file-display">
+          <button class="fremove" onclick="removeFile()">✕</button>
+          <div class="fbox" id="file-icon">📄</div>
+          <div>
+            <div class="fname" id="file-name">file.ext</div>
+            <div class="fstatus" id="file-status">Extracting...</div>
+          </div>
+        </div>
+
+        <!-- Describe field — always visible -->
+        <div class="describe-wrap">
+          <div class="describe-label-row">
+            <span id="describe-icon">💬</span>
+            <span id="describe-label-text">What would you like to focus on?</span>
+            <span style="font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--dark-light);">(optional)</span>
+          </div>
+          <textarea id="describe-input" class="describe-ta" placeholder="e.g. Focus on key theorems, explain for a beginner, emphasise dates and events..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Block 02 -->
+    <div class="block" style="animation-delay:0.12s">
+      <div class="block-head">
+        <span class="block-title">02 — Output Format</span>
+        <span class="block-sub">Customise your output!</span>
+      </div>
+      <div class="block-body">
+
+        <div class="ctl-row">
+          <div>
+            <span class="ctl-label">Mode</span>
+            <div class="modes">
+              <button class="mode-btn on" id="type-summary"    onclick="selectOutputType('summary')">Summary</button>
+              <button class="mode-btn"    id="type-mindmap"    onclick="selectOutputType('mindmap')">Mindmap</button>
+              <button class="mode-btn"    id="type-quiz"       onclick="selectOutputType('quiz')">Quiz</button>
+              <button class="mode-btn"    id="type-flashcards" onclick="selectOutputType('flashcards')">Cards</button>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="startAnalysis()">Process Notes ✨</button>
+        </div>
+
+        <!-- Options chips -->
+        <div class="opt-grid">
+
+          <!-- Difficulty -->
+          <div class="opt-group" id="opt-difficulty">
+            <span class="opt-group-label">Difficulty</span>
+            <div class="chip-row">
+              <div class="chip"     data-group="difficulty" data-val="easy"   onclick="selectChip(this)">Easy</div>
+              <div class="chip sel" data-group="difficulty" data-val="medium" onclick="selectChip(this)">Medium</div>
+              <div class="chip"     data-group="difficulty" data-val="hard"   onclick="selectChip(this)">Hard</div>
+            </div>
+          </div>
+
+          <!-- Detail level -->
+          <div class="opt-group" id="opt-detail">
+            <span class="opt-group-label">Detail Level</span>
+            <div class="chip-row">
+              <div class="chip"     data-group="detail" data-val="brief"    onclick="selectChip(this)">Brief</div>
+              <div class="chip sel" data-group="detail" data-val="standard" onclick="selectChip(this)">Standard</div>
+              <div class="chip"     data-group="detail" data-val="detailed" onclick="selectChip(this)">In-depth</div>
+            </div>
+          </div>
+
+          <!-- Count (quiz + flashcards only) -->
+          <div class="opt-count" id="opt-count">
+            <span class="opt-group-label" id="opt-count-label">No. of Questions</span>
+            <div class="chip-row">
+              <div class="chip"     data-group="count" data-val="5"  onclick="selectChip(this)">5</div>
+              <div class="chip sel" data-group="count" data-val="10" onclick="selectChip(this)">10</div>
+              <div class="chip"     data-group="count" data-val="15" onclick="selectChip(this)">15</div>
+              <div class="chip"     data-group="count" data-val="20" onclick="selectChip(this)">20</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading (inside input section) -->
+    <div id="loading-overlay" class="block">
+      <div class="block-head">
+        <span class="block-title">Processing...</span>
+        <span class="block-sub" id="loading-status">Working!</span>
+      </div>
+      <div class="load-body">
+        <div class="load-title">Thinking<br>hard! 🧠</div>
+        <div class="load-spinner-wrap"><div class="load-spinner"></div></div>
+        <div class="load-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="load-bar" id="loading-progress-bar"></div>
+        </div>
+        <div class="load-progress-meta">
+          <span id="loading-step">Starting</span>
+          <span id="loading-percent">0%</span>
+        </div>
+        <div class="load-label" id="loading-label">Analyzing your notes...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── RESULTS SECTION ── -->
+  <div id="results-section">
+    <div class="block">
+      <div class="block-head">
+        <button class="btn-secondary" onclick="goBackToInput()">← Back</button>
+        <span class="block-title" id="results-header-title">Results</span>
+        <span class="block-sub">&nbsp;</span>
+      </div>
+      <div class="block-body" style="min-height:420px;">
+
+        <div id="view-summary" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+            <span class="mono-tag"><span class="stripe"></span>Executive Summary</span>
+            <button class="btn-ghost" onclick="copyToClipboard('summary-content')">Copy ↗</button>
+          </div>
+          <div id="summary-content" class="ai-content"></div>
+        </div>
+
+        <div id="view-mindmap" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <span class="mono-tag"><span class="stripe"></span>Concept Visualization</span>
+            <span class="mono-tag">Pan &amp; Zoom</span>
+          </div>
+          <div id="mindmap-container"><div id="mindmap-render" style="width:100%;"></div></div>
+          <div id="mindmap-error" style="display:none;margin-top:1rem;padding:0.75rem;border:var(--b2);border-color:#dc2626;border-radius:var(--radius);font-family:'Fredoka',sans-serif;font-size:0.9rem;color:#dc2626;background:#fef2f2;">Oops! Mindmap render failed.</div>
+        </div>
+
+        <div id="view-quiz" style="display:none;">
+          <div id="quiz-game-area">
+            <div class="q-meta">Question <span id="quiz-current-num">1</span> of <span id="quiz-total-num">?</span></div>
+            <div class="q-text" id="quiz-question">Loading...</div>
+            <div id="quiz-options"></div>
+            <div class="q-fb" id="quiz-feedback"></div>
+            <div style="text-align:right;margin-top:1rem;">
+              <button id="quiz-next-btn" class="btn-primary" onclick="nextQuizQuestion()" style="display:none;">Next →</button>
+            </div>
+          </div>
+          <div id="quiz-results-area" style="display:none;">
+            <div class="score-wrap">
+              <div class="mono-tag">Your Final Score 🎉</div>
+              <div class="score-big"><span id="quiz-score-final">0</span><span style="font-size:0.45em;color:var(--dark-light);"> / </span><span id="quiz-score-total" style="font-size:0.45em;color:var(--dark-light);">0</span></div>
+              <div class="score-rule"></div>
+              <button class="btn-primary" onclick="restartQuiz()">↺ Retake Quiz</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-flashcards" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <span class="mono-tag"><span class="stripe"></span>Card <span id="flashcard-current-num">1</span> / <span id="flashcard-total-num">?</span></span>
+          </div>
+          <div class="perspective" style="max-width:600px;margin:0 auto;">
+            <div id="flashcard-container" class="flip-card" style="height:268px;" onclick="this.classList.toggle('flipped')">
+              <div class="flip-inner">
+                <div class="fc-face front">
+                  <span class="fc-label">Concept</span>
+                  <div class="fc-text" id="flashcard-front"></div>
+                  <span class="fc-hint">Click to reveal →</span>
+                </div>
+                <div class="fc-face back">
+                  <span class="fc-label">Definition</span>
+                  <div class="fc-text" id="flashcard-back"></div>
+                  <span class="fc-hint">← Click to flip back</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+              <button class="btn-secondary" onclick="prevFlashcard()" style="flex:1;justify-content:center;border:var(--b2);">← Previous</button>
+              <button class="btn-primary"   onclick="nextFlashcard()" style="flex:1;justify-content:center;">Next →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align:center;padding:2rem 0;font-family:'Fredoka',sans-serif;font-size:0.85rem;font-weight:500;color:var(--dark-mid);">
+    Powered by AI ✨ · Notes, Unraveled!
+  </footer>
+</div>
+
+<div id="tc"></div>
+
+<script>
+mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+
+const state = {
+  notes:'', fileText:'', fileName:'', userDesc:'',
+  outputType:'summary', difficulty:'medium', detail:'standard', count:10,
+  summaryHtml:'', mindmapCode:'',
+  quizData:[], currentQuizIndex:0, quizScore:0,
+  flashcardsData:[], currentFlashcardIndex:0
+};
+
+function showToast(msg, type='info') {
+  const t = document.createElement('div');
+  const icons={info:'ℹ️',success:'✓',error:'✕'};
+  const cols={info:'var(--dark)',success:'#16a34a',error:'#dc2626'};
+  t.className=`toast ${type==='success'?'ok':type==='error'?'err':''}`;
+  t.innerHTML=`<span style="color:${cols[type]};font-size:1.1rem;">${icons[type]}</span>${msg}`;
+  document.getElementById('tc').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(()=>t.remove(),300);},3000);
+}
+
+function copyToClipboard(id) {
+  const ta=document.createElement('textarea');
+  ta.value=document.getElementById(id).innerText;
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');showToast('Copied!','success');}
+  catch(e){showToast('Copy failed.','error');}
+  document.body.removeChild(ta);
+}
+
+function selectChip(el) {
+  const g=el.dataset.group;
+  document.querySelectorAll(`.chip[data-group="${g}"]`).forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  if(g==='difficulty') state.difficulty=el.dataset.val;
+  if(g==='detail')     state.detail=el.dataset.val;
+  if(g==='count')      state.count=parseInt(el.dataset.val);
+}
+
+function selectOutputType(type) {
+  state.outputType=type;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById(`type-${type}`).classList.add('on');
+  const countEl  = document.getElementById('opt-count');
+  const countLbl = document.getElementById('opt-count-label');
+  const diffEl   = document.getElementById('opt-difficulty');
+  const detailEl = document.getElementById('opt-detail');
+  if(type==='quiz') {
+    countEl.classList.add('vis'); countLbl.innerText='No. of Questions';
+    diffEl.style.display=''; detailEl.style.display='none';
+  } else if(type==='flashcards') {
+    countEl.classList.add('vis'); countLbl.innerText='No. of Cards';
+    diffEl.style.display=''; detailEl.style.display='';
+  } else if(type==='mindmap') {
+    countEl.classList.remove('vis');
+    diffEl.style.display='none'; detailEl.style.display='';
+  } else {
+    countEl.classList.remove('vis');
+    diffEl.style.display=''; detailEl.style.display='';
+  }
+}
+
+async function handleFileUpload(event) {
+  const file=event.target.files[0]; if(!file) return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  state.fileName=file.name;
+  document.getElementById('notes-input').style.display='none';
+  document.getElementById('file-display').classList.add('vis');
+  document.getElementById('file-name').innerText=file.name;
+  const icon=document.getElementById('file-icon');
+  icon.innerText = ext==='pdf'?'📕':['csv','xls','xlsx'].includes(ext)?'📊':'📄';
+  const st=document.getElementById('file-status');
+  st.innerText='Extracting text...';
+  // Update describe field to be more specific
+  document.getElementById('describe-icon').innerText='🎯';
+  document.getElementById('describe-label-text').innerText='Describe exactly what you want from this file';
+  document.getElementById('describe-input').placeholder='e.g. Summarise only the methodology section, focus on Chapter 2 definitions, create cards only about the historical timeline...';
+  try {
+    if(ext==='pdf') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+      const pdf=await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+      let txt='';
+      for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const c=await pg.getTextContent();txt+=c.items.map(x=>x.str).join(' ')+'\n';}
+      state.fileText=txt;
+    } else {
+      state.fileText=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsText(file);});
+    }
+    st.innerText=`${(file.size/1024).toFixed(1)} KB · Ready!`;
+    showToast('File extracted!','success');
+  } catch(e){showToast('Failed to read file.','error');removeFile();}
+  event.target.value='';
+}
+
+function removeFile() {
+  state.fileText=''; state.fileName='';
+  document.getElementById('file-display').classList.remove('vis');
+  document.getElementById('notes-input').style.display='';
+  document.getElementById('notes-input').value='';
+  document.getElementById('describe-icon').innerText='💬';
+  document.getElementById('describe-label-text').innerText='What would you like to focus on?';
+  document.getElementById('describe-input').placeholder='e.g. Focus on key theorems, explain for a beginner, emphasise dates and events...';
+}
+
+function setGenerationLoading(isLoading) {
+  const inputSection = document.getElementById('input-section');
+  const loading = document.getElementById('loading-overlay');
+  Array.from(inputSection.children).forEach(child => {
+    if (child.id !== 'loading-overlay') child.style.display = isLoading ? 'none' : '';
+  });
+  inputSection.style.display = '';
+  loading.classList.toggle('vis', isLoading);
+  if (isLoading) setProgress(0, 'Starting', 'Analyzing your notes...');
+}
+
+function goBackToInput() {
+  stopLoadingProgress();
+  setGenerationLoading(false);
+  document.getElementById('results-section').classList.remove('vis');
+  document.getElementById('input-section').style.display='';
+}
+
+async function callGemini(prompt, isJson=false) {
+  const delays=[1000,2000,4000,8000,16000]; let lastErr;
+  for(let i=0;i<=5;i++){
+    try{
+      const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt,isJson})});
+      if(!resp.ok){const e=await resp.json();throw new Error(e.error||`Error ${resp.status}`);}
+      return (await resp.json()).result;
+    }catch(err){lastErr=err;if(i<5)await new Promise(r=>setTimeout(r,delays[i]));}
+  }
+  throw lastErr;
+}
+
+let loadingProgressTimer = null;
+let loadingProgressValue = 0;
+
+function setProgress(value, stepText, labelText) {
+  const safe = Math.max(0, Math.min(100, Math.round(value)));
+  loadingProgressValue = safe;
+  const bar = document.getElementById('loading-progress-bar');
+  const track = bar ? bar.parentElement : null;
+  const percent = document.getElementById('loading-percent');
+  const step = document.getElementById('loading-step');
+  const label = document.getElementById('loading-label');
+  if (bar) bar.style.width = `${safe}%`;
+  if (track) track.setAttribute('aria-valuenow', safe);
+  if (percent) percent.innerText = `${safe}%`;
+  if (stepText && step) step.innerText = stepText;
+  if (labelText && label) label.innerText = labelText;
+}
+
+function startLoadingProgress() {
+  stopLoadingProgress();
+  setProgress(8, 'Reading notes', 'Analyzing your notes...');
+  loadingProgressTimer = setInterval(() => {
+    if (loadingProgressValue >= 92) return;
+    const bump = loadingProgressValue < 45 ? 7 : loadingProgressValue < 75 ? 4 : 2;
+    const next = Math.min(92, loadingProgressValue + Math.max(1, Math.round(Math.random() * bump)));
+    setProgress(next);
+  }, 450);
+}
+
+function stopLoadingProgress() {
+  if (loadingProgressTimer) clearInterval(loadingProgressTimer);
+  loadingProgressTimer = null;
+}
+
+function finishLoadingProgress() {
+  stopLoadingProgress();
+  setProgress(100, 'Complete', 'Done!');
+}
+
+function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+async function startAnalysis() {
+  const notes=state.fileText||document.getElementById('notes-input').value.trim();
+  if(!notes){showToast('Enter or upload notes first!','error');return;}
+  if(notes.length<50){showToast('Notes too short — add more!','error');return;}
+  state.notes=notes;
+  state.userDesc=document.getElementById('describe-input').value.trim();
+  setGenerationLoading(true);
+  startLoadingProgress();
+  document.getElementById('results-section').classList.remove('vis');
+  ['view-summary','view-mindmap','view-quiz','view-flashcards'].forEach(id=>document.getElementById(id).style.display='none');
+  try{
+    let hdr='';
+    if(state.outputType==='summary'){setLoadLabel('Generating Summary...', 'Summary');setProgress(22, 'Generating', 'Generating Summary...');hdr='Summary';await generateSummary();setProgress(88, 'Rendering', 'Formatting your summary...');document.getElementById('summary-content').innerHTML=state.summaryHtml;document.getElementById('view-summary').style.display='';}
+    else if(state.outputType==='mindmap'){setLoadLabel('Visualizing Concepts...', 'Mindmap');setProgress(22, 'Generating', 'Visualizing Concepts...');hdr='Mindmap';await generateMindmap();setProgress(88, 'Rendering', 'Drawing your mindmap...');document.getElementById('view-mindmap').style.display='';renderMindmap(state.mindmapCode);}
+    else if(state.outputType==='quiz'){setLoadLabel('Crafting Quiz...', 'Quiz');setProgress(22, 'Generating', 'Crafting Quiz...');hdr='Quiz';await generateQuiz();setProgress(88, 'Rendering', 'Setting up quiz questions...');document.getElementById('view-quiz').style.display='';restartQuiz();}
+    else if(state.outputType==='flashcards'){setLoadLabel('Building Flashcards...', 'Cards');setProgress(22, 'Generating', 'Building Flashcards...');hdr='Flashcards';await generateFlashcards();setProgress(88, 'Rendering', 'Stacking your flashcards...');document.getElementById('view-flashcards').style.display='';restartFlashcards();}
+    document.getElementById('results-header-title').innerText=hdr;
+    finishLoadingProgress();
+    await wait(250);
+    setGenerationLoading(false);
+    document.getElementById('input-section').style.display='none';
+    document.getElementById('results-section').classList.add('vis');
+    showToast('Done! 🎉','success');
+  }catch(err){
+    stopLoadingProgress();
+    setGenerationLoading(false);
+    document.getElementById('input-section').style.display='';
+    showToast(err.message||'Error occurred.','error');
+  }
+}
+
+function setLoadLabel(txt, stepText){
+  document.getElementById('loading-status').innerText=txt;
+  document.getElementById('loading-label').innerText=txt;
+  if(stepText) document.getElementById('loading-step').innerText=stepText;
+}
+
+function descClause(){return state.userDesc?`\n\nUser instructions: "${state.userDesc}"`:''; }
+
+async function generateSummary(){
+  const dm={brief:'concise (3–5 key points only)',standard:'well-structured and thorough',detailed:'comprehensive and highly detailed with examples and sub-points'};
+  const r=await callGemini(`Provide a ${dm[state.detail]} summary of the following notes. Highlight key concepts, main arguments and important details. Structure output using ONLY these HTML tags: <h3>,<p>,<ul>,<li>,<strong>,<em>. No markdown code blocks.${descClause()}\n\nNotes:\n${state.notes}`);
+  state.summaryHtml=r.replace(/```html/g,'').replace(/```/g,'').trim();
+}
+
+async function generateMindmap(){
+  const dm={brief:'with at most 10 nodes',standard:'with 12–16 nodes',detailed:'with up to 20 nodes'};
+  let r=await callGemini(`Create a mindmap of the core concepts ${dm[state.detail]}. Output ONLY valid Mermaid.js 'graph LR' syntax. No parentheses/brackets in node labels. No code blocks.${descClause()}\n\nNotes:\n${state.notes}`);
+  state.mindmapCode=r.replace(/```mermaid/g,'').replace(/```/g,'').trim();
+}
+
+async function generateQuiz(){
+  const dm={easy:'straightforward factual recall',medium:'moderate comprehension and application',hard:'challenging analysis, inference and critical thinking'};
+  const r=await callGemini(`Create a ${state.count}-question multiple-choice quiz. Difficulty: ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"question":"...","options":["A","B","C","D"],"answerIndex":0}]${descClause()}\n\nNotes:\n${state.notes}`,true);
+  try{state.quizData=JSON.parse(r);if(!Array.isArray(state.quizData)||!state.quizData.length)throw '';}
+  catch{state.quizData=[{question:'Could not generate quiz.',options:['Try again','More notes','Check API','Refresh'],answerIndex:0}];}
+}
+
+async function generateFlashcards(){
+  const dm={easy:'basic definitions and simple facts',medium:'key concepts, processes and relationships',hard:'nuanced distinctions, edge cases and deeper explanations'};
+  const r=await callGemini(`Create ${state.count} educational flashcards. Focus on ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"front":"Term (max 7 words)","back":"Definition"}]${descClause()}\n\nNotes:\n${state.notes}`,true);
+  try{state.flashcardsData=JSON.parse(r);if(!Array.isArray(state.flashcardsData)||!state.flashcardsData.length)throw '';}
+  catch{state.flashcardsData=[{front:'Error',back:'Could not generate flashcards.'}];}
+}
+
+async function renderMindmap(code){
+  const el=document.getElementById('mindmap-render');const err=document.getElementById('mindmap-error');
+  el.innerHTML='';err.style.display='none';
+  try{const{svg}=await mermaid.render('mm'+Date.now(),code);el.innerHTML=svg;const s=el.querySelector('svg');if(s){s.style.maxWidth='100%';s.style.height='auto';}}
+  catch(e){err.style.display='';el.innerHTML=`<pre style="font-family:'Nunito',sans-serif;font-size:0.75rem;padding:1rem;overflow:auto;">${code}</pre>`;}
+}
+
+function restartFlashcards(){state.currentFlashcardIndex=0;renderFlashcard();}
+function renderFlashcard(){
+  if(!state.flashcardsData.length)return;
+  const c=state.flashcardsData[state.currentFlashcardIndex];
+  document.getElementById('flashcard-current-num').innerText=state.currentFlashcardIndex+1;
+  document.getElementById('flashcard-total-num').innerText=state.flashcardsData.length;
+  document.getElementById('flashcard-front').innerText=c.front;
+  document.getElementById('flashcard-back').innerText=c.back;
+  document.getElementById('flashcard-container').classList.remove('flipped');
+}
+function nextFlashcard(){if(state.currentFlashcardIndex<state.flashcardsData.length-1){state.currentFlashcardIndex++;renderFlashcard();}else{showToast('End of flashcards!','info');}}
+function prevFlashcard(){if(state.currentFlashcardIndex>0){state.currentFlashcardIndex--;renderFlashcard();}}
+
+function renderQuizQuestion(){
+  if(!state.quizData.length)return;
+  const q=state.quizData[state.currentQuizIndex];
+  document.getElementById('quiz-current-num').innerText=state.currentQuizIndex+1;
+  document.getElementById('quiz-total-num').innerText=state.quizData.length;
+  document.getElementById('quiz-question').innerText=q.question;
+  const wrap=document.getElementById('quiz-options');wrap.innerHTML='';
+  q.options.forEach((opt,i)=>{const btn=document.createElement('button');btn.className='q-opt';btn.innerHTML=`<span class="ql">${String.fromCharCode(65+i)}</span><span>${opt}</span>`;btn.onclick=()=>handleQuizAnswer(i);wrap.appendChild(btn);});
+  document.getElementById('quiz-feedback').style.display='none';
+  document.getElementById('quiz-feedback').className='q-fb';
+  document.getElementById('quiz-next-btn').style.display='none';
+}
+function handleQuizAnswer(si){
+  const q=state.quizData[state.currentQuizIndex];const ok=si===q.answerIndex;
+  document.querySelectorAll('.q-opt').forEach((b,i)=>{b.disabled=true;if(i===q.answerIndex)b.classList.add('correct');else if(i===si&&!ok)b.classList.add('wrong');else b.style.opacity='0.4';});
+  const fb=document.getElementById('quiz-feedback');fb.style.display='';
+  if(ok){state.quizScore++;fb.className='q-fb ok';fb.innerText='✓ Correct! Great job!';}
+  else{fb.className='q-fb bad';fb.innerText='✕ Not quite — keep going!';}
+  const nb=document.getElementById('quiz-next-btn');nb.style.display='';
+  nb.innerText=state.currentQuizIndex===state.quizData.length-1?'See Results 🎉':'Next Question →';
+}
+function nextQuizQuestion(){if(state.currentQuizIndex<state.quizData.length-1){state.currentQuizIndex++;renderQuizQuestion();}else{showQuizResults();}}
+function showQuizResults(){document.getElementById('quiz-game-area').style.display='none';document.getElementById('quiz-results-area').style.display='';document.getElementById('quiz-score-final').innerText=state.quizScore;document.getElementById('quiz-score-total').innerText=state.quizData.length;}
+function restartQuiz(){state.currentQuizIndex=0;state.quizScore=0;document.getElementById('quiz-results-area').style.display='none';document.getElementById('quiz-game-area').style.display='';renderQuizQuestion();}
+</script>
+</body>
+</html>
