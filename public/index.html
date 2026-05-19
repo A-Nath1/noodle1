@@ -176,8 +176,9 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
 .ai-content ul, .ai-content ol { padding-left: 1.4rem; margin-bottom: 0.9rem; color: var(--dark-mid); }
 .ai-content li { margin-bottom: 0.35rem; }
 .ai-content strong { color: var(--dark); font-weight: 700; }
-#mindmap-container { min-height: 500px; background: var(--blue-light); border: var(--b2); border-radius: var(--radius); overflow: hidden; position: relative; }
-#mindmap-render { width: 100%; height: 500px; }
+#mindmap-container { min-height: 500px; background: var(--blue-light); border: var(--b2); border-radius: var(--radius); overflow: hidden; position: relative; display: flex; }
+#mindmap-render { width: 100%; height: 500px; min-height: 500px; }
+#mindmap-render svg { width: 100%; height: 100%; display: block; }
 
 .taste-sentence { display: inline; cursor: pointer; padding: 2px 4px; border-radius: 4px; transition: all 0.2s; border-bottom: 2px solid transparent; }
 .taste-sentence:hover { background: var(--yellow); border-bottom-color: var(--blue); }
@@ -273,7 +274,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
     <div class="hdr-row">
       <div class="logo-block" onclick="goToHome()" title="Return to Input">
         <div class="logo">N<em>O</em>ODLE</div>
-        <div class="logo-tagline">✏️ Active Learning, Unraveled.</div>
+        <div class="logo-tagline">✏️ Learning, Unraveled.</div>
       </div>
 
       <div class="bowl-wrap">
@@ -634,6 +635,7 @@ const state = {
 };
 
 let ingredientsWon = 0;
+let mindmapPanZoomInstance = null;
 
 // -- MOUSE PARALLAX --
 document.addEventListener('mousemove', (e) => {
@@ -867,6 +869,7 @@ async function startAnalysis() {
   
   try{
     let hdr='', sub='';
+    let shouldRenderMindmapAfterShow = false;
     
     if (state.outputType === 'tastetest') {
       startLoadingProgress('Error Check', 'Finding<br>flaws! 🔍'); hdr='Deception Audit'; sub='Find the 3 factual errors!';
@@ -902,7 +905,7 @@ async function startAnalysis() {
       startLoadingProgress('Mindmap', 'Linking<br>up! 🗺️'); hdr='Mindmap'; sub='Pan & zoom around.';
       await generateMindmap();
       document.getElementById('view-mindmap').style.display='';
-      renderMindmap(state.mindmapCode);
+      shouldRenderMindmapAfterShow = true;
     }
     else if(state.outputType==='quiz'){
       startLoadingProgress('Quiz', 'Testing<br>you! 📝'); hdr='Quiz'; sub='Select the best answer.';
@@ -925,6 +928,12 @@ async function startAnalysis() {
     setGenerationLoading(false);
     document.getElementById('input-section').style.display='none';
     document.getElementById('results-section').classList.add('vis');
+
+    if (shouldRenderMindmapAfterShow) {
+      // Mermaid + svg-pan-zoom need the container to be visible before measuring it.
+      await wait(60);
+      await renderMindmap(state.mindmapCode);
+    }
     
     if (state.outputType === 'tastetest') document.body.style.background = '#fef2f2'; // Danger vibe
     else if (state.outputType === 'fillblanks') document.body.style.background = '#eff6ff'; // Calm blue vibe
@@ -1166,26 +1175,124 @@ async function generateSummary(){
 }
 
 async function generateMindmap(){
-  const r=await callGemini(`Create a mindmap of the core concepts. Output ONLY valid Mermaid.js 'graph LR' syntax. No parentheses/brackets in labels. No code blocks.${descClause()}\n\nNotes:\n${state.notes}`);
-  state.mindmapCode=r.replace(/```mermaid/g,'').replace(/```/g,'').trim();
+  const r=await callGemini(`Create a Mermaid flowchart mindmap of the core concepts.
+  Output ONLY valid Mermaid.js syntax. No markdown and no commentary.
+  Use this exact style:
+  flowchart LR
+    A["Main topic"] --> B["Subtopic"]
+  Rules:
+  - Start with flowchart LR.
+  - Use short safe node IDs like A, B1, C2.
+  - Put every label inside square brackets with double quotes.
+  - Keep labels short and avoid parentheses, brackets, colons, quotes, semicolons, ampersands, and slashes inside label text.
+  - Create 8 to 16 nodes, grouped around the most important ideas.${descClause()}\n\nNotes:\n${state.notes}`);
+  state.mindmapCode = cleanMindmapCode(r);
+  if (!state.mindmapCode) throw new Error('The mindmap response was empty. Please try again.');
+}
+
+function cleanMindmapCode(raw){
+  let code = String(raw || '')
+    .replace(/```mermaid/gi, '')
+    .replace(/```/g, '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .trim();
+
+  // If the model adds prose before the diagram, keep only the Mermaid part.
+  const start = code.search(/\b(?:graph|flowchart)\s+(?:TB|TD|BT|RL|LR)\b/i);
+  if (start > 0) code = code.slice(start).trim();
+
+  code = code
+    .split('\n')
+    .map(line => line.replace(/^\s*(?:[-*]|\d+\.)\s+/, '').trimEnd())
+    .filter(line => line.trim())
+    .join('\n');
+
+  if (/^graph\s+/i.test(code)) code = code.replace(/^graph\s+/i, 'flowchart ');
+  if (!/^(?:flowchart|graph)\s+/i.test(code) && code.includes('-->')) code = `flowchart LR\n${code}`;
+
+  return code.trim();
+}
+
+function escapeHtml(str){
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 async function renderMindmap(code){
-  const el=document.getElementById('mindmap-render');const err=document.getElementById('mindmap-error');
-  el.innerHTML='';err.style.display='none';
+  const el = document.getElementById('mindmap-render');
+  const err = document.getElementById('mindmap-error');
+  const safeCode = cleanMindmapCode(code);
+
+  if (mindmapPanZoomInstance && typeof mindmapPanZoomInstance.destroy === 'function') {
+    mindmapPanZoomInstance.destroy();
+    mindmapPanZoomInstance = null;
+  }
+
+  err.style.display = 'none';
+  el.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:700;color:var(--dark-mid);">Drawing mindmap…</div>`;
+
   try{
-    const{svg}=await mermaid.render('mm'+Date.now(),code);
-    el.innerHTML=svg;
-    const s=el.querySelector('svg');
+    if (!safeCode) throw new Error('Empty Mermaid diagram');
+
+    // Wait until the results panel is visible; svg-pan-zoom measures the rendered container.
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+
+    const id = 'mm' + Date.now() + Math.random().toString(36).slice(2);
+    const { svg } = await mermaid.render(id, safeCode);
+    el.innerHTML = svg;
+
+    const s = el.querySelector('svg');
     if(s){
-      s.style.width='100%';
-      s.style.height='100%';
-      s.style.maxWidth='none';
-      svgPanZoom(s, { zoomEnabled: true, controlIconsEnabled: true, fit: true, center: true, minZoom: 0.1 });
+      s.removeAttribute('width');
+      s.removeAttribute('height');
+      s.style.width = '100%';
+      s.style.height = '100%';
+      s.style.maxWidth = 'none';
+      s.style.display = 'block';
+      s.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+      if (typeof svgPanZoom === 'function') {
+        mindmapPanZoomInstance = svgPanZoom(s, {
+          zoomEnabled: true,
+          controlIconsEnabled: true,
+          fit: true,
+          center: true,
+          minZoom: 0.1,
+          maxZoom: 20
+        });
+
+        setTimeout(() => {
+          if (mindmapPanZoomInstance) {
+            mindmapPanZoomInstance.resize();
+            mindmapPanZoomInstance.fit();
+            mindmapPanZoomInstance.center();
+          }
+        }, 100);
+      }
     }
   }
-  catch(e){err.style.display='';el.innerHTML=`<pre style="font-family:'Nunito',sans-serif;font-size:0.75rem;padding:1rem;overflow:auto;">${code}</pre>`;}
+  catch(e){
+    console.error('Mindmap render failed:', e, safeCode);
+    err.style.display = '';
+    err.innerHTML = `Oops! Mindmap render failed. <span style="font-size:0.8rem;">${escapeHtml(e.message || e)}</span>`;
+    el.innerHTML = `<pre style="font-family:'Nunito',sans-serif;font-size:0.75rem;padding:1rem;overflow:auto;height:100%;white-space:pre-wrap;">${escapeHtml(safeCode || code)}</pre>`;
+  }
 }
+
+window.addEventListener('resize', () => {
+  if (mindmapPanZoomInstance) {
+    mindmapPanZoomInstance.resize();
+    mindmapPanZoomInstance.fit();
+    mindmapPanZoomInstance.center();
+  }
+});
 
 async function generateGame(){
   const r=await callGemini(`Extract exactly ${state.count} key terms and their very short definitions (maximum 6 words per definition) from the notes to create a memory matching game. Return STRICTLY as JSON array: [{"term":"...","def":"..."}]${descClause()}\n\nNotes:\n${state.notes}`,true);
