@@ -387,8 +387,8 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
             <span class="ctl-label">Mode</span>
             <div class="modes">
               <button class="mode-btn on" id="type-tastetest" onclick="selectOutputType('tastetest')">👀 Error Check</button>
-              <button class="mode-btn"    id="type-stdflashcards" onclick="selectOutputType('stdflashcards')">🃏 Standard Cards</button>
-              <button class="mode-btn"    id="type-noodlepull" onclick="selectOutputType('noodlepull')">📑 Layered Cards</button>
+              <button class="mode-btn"    id="type-stdflashcards" onclick="selectOutputType('stdflashcards')">🃏 Flashcards</button>
+              <button class="mode-btn"    id="type-noodlepull" onclick="selectOutputType('noodlepull')">📑 Layered Flashcards</button>
               <button class="mode-btn"    id="type-fillblanks"  onclick="selectOutputType('fillblanks')">🧩 Fill Blanks</button>
               <button class="mode-btn"    id="type-summary"   onclick="selectOutputType('summary')">📝 Summary</button>
               <button class="mode-btn"    id="type-mindmap"   onclick="selectOutputType('mindmap')">🗺️ Mindmap</button>
@@ -485,6 +485,11 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
               <button class="btn-secondary" onclick="prevStdFlashcard()" style="flex:1;justify-content:center;border:var(--b2);">← Previous</button>
               <button class="btn-primary"   onclick="nextStdFlashcard()" style="flex:1;justify-content:center;">Next →</button>
             </div>
+            <div style="display:flex;gap:0.75rem;margin-top:0.75rem;justify-content:center;flex-wrap:wrap;">
+              <button class="btn-ghost" onclick="getHint('stdflashcard')">💡 Hint</button>
+              <button class="btn-ghost" onclick="getMnemonic()">🧠 How to Remember</button>
+            </div>
+            <div class="q-fb" id="sf-helper-box" style="margin-top:1rem;font-weight:500;font-size:0.9rem;"></div>
           </div>
         </div>
 
@@ -588,7 +593,11 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
             <div class="q-meta">Question <span id="quiz-current-num">1</span> of <span id="quiz-total-num">?</span></div>
             <div class="q-text" id="quiz-question">Loading...</div>
             <div id="quiz-options"></div>
+            <div style="text-align:right;margin-top:0.5rem;margin-bottom:0.5rem;">
+              <button id="quiz-hint-btn" class="btn-ghost" onclick="getHint('quiz')">💡 Need a Hint?</button>
+            </div>
             <div class="q-fb" id="quiz-feedback"></div>
+            <div class="q-fb" id="quiz-helper-box" style="margin-top:0.5rem;font-weight:500;"></div>
             <div style="text-align:right;margin-top:1rem;">
               <button id="quiz-next-btn" class="btn-primary" onclick="nextQuizQuestion()" style="display:none;">Next →</button>
             </div>
@@ -1378,9 +1387,12 @@ function handleGameCardClick(btn, cardInfo) {
 
 async function generateQuiz(){
   const dm={easy:'straightforward factual recall',medium:'moderate comprehension',hard:'challenging analysis and critical thinking'};
-  const r=await callGemini(`Create a ${state.count}-question multiple-choice quiz. Difficulty: ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"question":"...","options":["A","B","C","D"],"answerIndex":0}]${descClause()}\n\nNotes:\n${state.notes}`,true);
+  const r=await callGemini(`Create a ${state.count}-question multiple-choice quiz. Difficulty: ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"question":"...","options":["A","B","C","D"],"answerIndex":0,"hint":"A short Socratic hint that nudges the learner without giving away the answer"}]${descClause()}
+
+Notes:
+${state.notes}`,true);
   try{state.quizData=JSON.parse(r);if(!Array.isArray(state.quizData))throw '';}
-  catch{state.quizData=[{question:'Could not generate quiz.',options:['Try again','More notes','Check API','Refresh'],answerIndex:0}];}
+  catch{state.quizData=[{question:'Could not generate quiz.',options:['Try again','More notes','Check API','Refresh'],answerIndex:0,hint:'No hint available.'}];}
 }
 
 function renderQuizQuestion(){
@@ -1393,6 +1405,10 @@ function renderQuizQuestion(){
   q.options.forEach((opt,i)=>{const btn=document.createElement('button');btn.className='q-opt';btn.innerHTML=`<span class="ql">${String.fromCharCode(65+i)}</span><span>${opt}</span>`;btn.onclick=()=>handleQuizAnswer(i);wrap.appendChild(btn);});
   document.getElementById('quiz-feedback').style.display='none';
   document.getElementById('quiz-next-btn').style.display='none';
+  const helperBox = document.getElementById('quiz-helper-box');
+  if (helperBox) helperBox.style.display = 'none';
+  const hintBtn = document.getElementById('quiz-hint-btn');
+  if (hintBtn) hintBtn.style.display = 'inline-flex';
 }
 
 function handleQuizAnswer(si){
@@ -1427,13 +1443,16 @@ function restartQuiz(){
 
 async function generateStdFlashcards(){
   const dm={easy:'basic definitions',medium:'key concepts',hard:'nuanced distinctions'};
-  const r=await callGemini(`Create ${state.count} educational flashcards. Focus on ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"front":"Term (max 7 words)","back":"Definition"}]${descClause()}\n\nNotes:\n${state.notes}`,true);
+  const r=await callGemini(`Create ${state.count} educational flashcards. Focus on ${dm[state.difficulty]}. Return STRICTLY as JSON array: [{"front":"Term (max 7 words)","back":"Definition","hint":"A cryptic Socratic hint to remember the definition","mnemonic":"A very brief memorable visual association or funny phrase"}]${descClause()}
+
+Notes:
+${state.notes}`,true);
   try{
     state.stdFlashcardsData=JSON.parse(r);
     if(!Array.isArray(state.stdFlashcardsData)||!state.stdFlashcardsData.length)throw '';
   }
   catch{
-    state.stdFlashcardsData=[{front:'Error',back:'Could not generate flashcards.'}];
+    state.stdFlashcardsData=[{front:'Error',back:'Could not generate flashcards.',hint:'No hint available.',mnemonic:'No mnemonic available.'}];
   }
 }
 
@@ -1465,6 +1484,8 @@ function renderStdFlashcard(){
   backEl.style.fontSize = getFontSize(c.back);
 
   document.getElementById('sf-container').classList.remove('flipped');
+  const helperBox = document.getElementById('sf-helper-box');
+  if (helperBox) helperBox.style.display = 'none';
 }
 
 function nextStdFlashcard(){
@@ -1482,6 +1503,34 @@ function prevStdFlashcard(){
     state.currentStdFlashcardIndex--;
     renderStdFlashcard();
   }
+}
+
+function getHint(type) {
+  if (type === 'quiz') {
+    const box = document.getElementById('quiz-helper-box');
+    const q = state.quizData[state.currentQuizIndex] || {};
+    if (!box) return;
+    box.style.display = 'block';
+    box.className = 'q-fb ok';
+    box.innerHTML = `<strong>💡 Hint:</strong> ${q.hint || 'No hint generated.'}`;
+    return;
+  }
+
+  const box = document.getElementById('sf-helper-box');
+  const c = state.stdFlashcardsData[state.currentStdFlashcardIndex] || {};
+  if (!box) return;
+  box.style.display = 'block';
+  box.className = 'q-fb ok';
+  box.innerHTML = `<strong>💡 Hint:</strong> ${c.hint || 'No hint generated.'}`;
+}
+
+function getMnemonic() {
+  const box = document.getElementById('sf-helper-box');
+  const c = state.stdFlashcardsData[state.currentStdFlashcardIndex] || {};
+  if (!box) return;
+  box.style.display = 'block';
+  box.className = 'q-fb ok';
+  box.innerHTML = `<strong>🧠 How to remember:</strong> ${c.mnemonic || 'No mnemonic generated.'}`;
 }
 
 function checkRewards() {
