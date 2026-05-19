@@ -274,7 +274,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
     <div class="hdr-row">
       <div class="logo-block" onclick="goToHome()" title="Return to Input">
         <div class="logo">N<em>O</em>ODLE</div>
-        <div class="logo-tagline">✏️ Learning, Unraveled.</div>
+        <div class="logo-tagline">✏️ Active Learning, Unraveled.</div>
       </div>
 
       <div class="bowl-wrap">
@@ -550,7 +550,8 @@ body::before { content: ''; position: fixed; inset: 0; background-image: radial-
             <!-- Content injected here -->
           </div>
           
-          <div style="text-align: right; margin-top: 1.5rem;">
+          <div style="text-align: right; margin-top: 1.5rem; display:flex; gap:0.75rem; justify-content:flex-end; flex-wrap:wrap;">
+            <button class="btn-secondary" id="fillblanks-show-btn" onclick="showFillBlankAnswers()" style="border:var(--b2);">Show Answers 👀</button>
             <button class="btn-primary" id="fillblanks-check-btn" onclick="checkFillBlanks()">Check Answers</button>
           </div>
           <div class="q-fb" id="fillblanks-feedback"></div>
@@ -1118,13 +1119,17 @@ function renderFillBlanks() {
   container.innerHTML = '';
   document.getElementById('fillblanks-feedback').style.display = 'none';
   document.getElementById('fillblanks-check-btn').style.display = 'inline-flex';
+
+  const showBtn = document.getElementById('fillblanks-show-btn');
+  if (showBtn) showBtn.style.display = 'inline-flex';
   
   let html = '';
   state.fillBlanksData.forEach((item, i) => {
     if (item.text) {
       html += `<span>${item.text.replace(/\n/g, '<br>')}</span>`;
     } else if (item.blank) {
-      html += `<input type="text" class="fb-input" data-answer="${item.blank.toLowerCase().trim()}" id="fb-input-${i}" autocomplete="off">`;
+      const answer = String(item.blank).trim();
+      html += `<input type="text" class="fb-input" data-answer="${answer.toLowerCase()}" data-answer-display="${answer}" id="fb-input-${i}" autocomplete="off">`;
     }
   });
   container.innerHTML = html;
@@ -1165,6 +1170,28 @@ function checkFillBlanks() {
     fb.className = 'q-fb bad';
     fb.innerText = `Keep trying! You got ${correct}/${total} correct.`;
   }
+}
+
+function showFillBlankAnswers() {
+  const inputs = document.querySelectorAll('.fb-input');
+
+  inputs.forEach(input => {
+    const answer = input.getAttribute('data-answer-display') || input.getAttribute('data-answer');
+    input.value = answer;
+    input.classList.remove('wrong');
+    input.classList.add('correct');
+    input.disabled = true;
+  });
+
+  const fb = document.getElementById('fillblanks-feedback');
+  fb.style.display = 'block';
+  fb.className = 'q-fb ok';
+  fb.innerText = '👀 Answers revealed! Review them, then try another set when ready.';
+
+  document.getElementById('fillblanks-check-btn').style.display = 'none';
+
+  const showBtn = document.getElementById('fillblanks-show-btn');
+  if (showBtn) showBtn.style.display = 'none';
 }
 
 
